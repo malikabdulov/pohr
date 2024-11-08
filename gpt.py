@@ -47,7 +47,7 @@ def parse_resume(resume_text):
                 "content": prompt,
             }
         ],
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         temperature=0.0
     )
     return chat_completion.choices[0].message.content

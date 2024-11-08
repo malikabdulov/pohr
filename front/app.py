@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 import requests
 from pymongo import MongoClient
-from mongo_controller import add_vacancy, get_all_vacancies
+from db.mongo_controller import add_vacancy, get_all_vacancies
 
 app = Flask(__name__)
 

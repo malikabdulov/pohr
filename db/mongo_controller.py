@@ -1,4 +1,4 @@
-from database import get_database
+from db.database import get_database
 
 # Получаем объект базы данных
 db = get_database()

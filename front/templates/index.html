@@ -3,45 +3,158 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Список вакансий</title>
+<title>Список данных</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+    .top-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .top-button {
+        padding: 15px 30px;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 10px;
+        width: 200px;
+    }
+
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .create-button {
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 5px;
+    }
+
+    /* Стили для списка вакансий */
+    .vacancy-item {
+        background-color: #f0f0f0;
+        border-left: 5px solid #007bff;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+
+    /* Стили для списка резюме */
+    .resume-item {
+        background-color: #e8f5e9;
+        border-left: 5px solid #4caf50;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+</style>
 </head>
 <body class="bg-light">
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Список вакансий</h1>
+    <!-- Горизонтальные кнопки навигации -->
+    <div class="top-buttons">
+        <a href="/vacancies" class="btn top-button {% if active_page == 'vacancies' %}btn-primary{% else %}btn-secondary{% endif %}">
+            Вакансии
+        </a>
+        <a href="/resumes" class="btn top-button {% if active_page == 'resumes' %}btn-primary{% else %}btn-secondary{% endif %}">
+            Резюме
+        </a>
+    </div>
+
+    <div class="container mt-4">
+        <!-- Заголовок и кнопка создания вакансии -->
+        <div class="header-section">
+            <h1 class="mb-0">
+                {% if data_type == "vacancies" %}
+                    Список вакансий
+                {% elif data_type == "resumes" %}
+                    Список резюме
+                {% endif %}
+            </h1>
+            {% if data_type == "vacancies" %}
+                <a href="/create_vacancy" class="btn btn-success create-button">Создать новую вакансию</a>
+            {% endif %}
+        </div>
 
         {% if error %}
             <div class="alert alert-danger">{{ error }}</div>
         {% endif %}
 
-        {% if vacancies %}
+        {% if items %}
             <div class="list-group">
-                {% for vacancy in vacancies %}
-                    <div class="list-group-item mb-3 shadow-sm">
-                        <h5 class="mb-2">{{ vacancy.title }}</h5>
-                        <div class="mb-2">
-                            <strong>Релевантный опыт:</strong>
-                            <p>{{ vacancy.experience }}</p>
+                {% if data_type == "vacancies" %}
+                    <!-- Отображение списка вакансий -->
+                    {% for item in items %}
+                        <div class="list-group-item vacancy-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5>{{ item.title }}</h5>
+                                <p><strong>Релевантный опыт:</strong> {{ item.experience }}</p>
+                                <p><strong>Навыки и компетенции:</strong> {{ item.skills }}</p>
+                                <p><strong>Образование и сертификация:</strong> {{ item.education }}</p>
+                            </div>
+                            <div>
+                                <a href="/edit_vacancy/{{ item._id }}" class="btn btn-outline-primary btn-sm mx-1">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <form action="/delete_vacancy/{{ item._id }}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm mx-1">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                        <div class="mb-2">
-                            <strong>Навыки и компетенции:</strong>
-                            <p>{{ vacancy.skills }}</p>
+                    {% endfor %}
+                {% elif data_type == "resumes" %}
+                    <!-- Отображение списка резюме -->
+                    {% for item in items %}
+                        <div class="list-group-item resume-item">
+                            <h4>{{ item.full_name }}</h4>
+                            <p class="text-muted"><i class="bi bi-telephone"></i> {{ item.contact_info.phone }} | <i class="bi bi-envelope"></i> {{ item.contact_info.email }}</p>
+                            <p><strong>Описание:</strong> {{ item.summary }}</p>
+                            <h5>Опыт работы:</h5>
+                            <ul class="list-unstyled">
+                                {% for experience in item.work_experience %}
+                                    <li>
+                                        <strong>{{ experience.position }}</strong> в {{ experience.company }}<br>
+                                        <span class="text-muted">{{ experience.duration }}</span>
+                                        <ul>
+                                            {% for responsibility in experience.responsibilities %}
+                                                <li>{{ responsibility }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <h5>Образование:</h5>
+                            <ul class="list-unstyled">
+                                {% for edu in item.education %}
+                                    <li>
+                                        <strong>{{ edu.institution }}</strong> — {{ edu.degree }}<br>
+                                        <span class="text-muted">{{ edu.field }}, {{ edu.years }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <p><strong>Навыки:</strong> {{ item.skills | join(', ') }}</p>
+                            <h5>Языки:</h5>
+                            <ul class="list-inline">
+                                {% for language, proficiency in item.languages.items() %}
+                                    <li class="list-inline-item"><strong>{{ language }}:</strong> {{ proficiency }}</li>
+                                {% endfor %}
+                            </ul>
+                            <p><strong>Дополнительно:</strong> {{ item.add_info }}</p>
                         </div>
-                        <div class="mb-2">
-                            <strong>Образование и сертификация:</strong>
-                            <p>{{ vacancy.education }}</p>
-                        </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                {% endif %}
             </div>
         {% else %}
-            <p class="text-center">Нет доступных вакансий.</p>
+            <p class="text-center">Нет доступных данных.</p>
         {% endif %}
-
-        <div class="text-center mt-4">
-            <a href="/create_vacancy" class="btn btn-success">Создать новую вакансию</a>
-        </div>
     </div>
 </body>
 </html>

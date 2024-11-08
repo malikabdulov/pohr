@@ -5,12 +5,12 @@ db = get_database()
 
 
 def add_user(user_info):
-    collection = db["resume"]
+    collection = db["resumes"]
     result = collection.insert_one(user_info)
     return str(result.inserted_id)
 
 def get_all_users():
-    collection = db["resume"]
+    collection = db["resumes"]
     users = list(collection.find())
     return users
 

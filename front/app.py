@@ -1,23 +1,72 @@
-from flask import Flask, render_template, request
+import os
+
+from bson import ObjectId
+from flask import Flask, render_template, request, redirect, url_for
 import requests
 from pymongo import MongoClient
-from db.mongo_controller import add_vacancy, get_all_vacancies
+from db.mongo_controller import add_vacancy, get_all_vacancies, get_all_users
 
 app = Flask(__name__)
 
-# URL вашего backend API
-API_SEARCH_URL = "http://localhost:5000/api/search_candidates"
-
 # Подключение к MongoDB
-
+client = MongoClient(os.getenv('MONGO_YURI'))
+db = client["my_database"]
+vacancies_collection = db["vacancies"]
+users_collection = db["resumes"]
 
 @app.route('/')
 def index():
-    """Главная страница со списком вакансий."""
+    """Главная страница со списком вакансий по умолчанию."""
     try:
-        # Получаем все вакансии из коллекции
-        vacancies = get_all_vacancies()
-        return render_template('index.html', vacancies=vacancies)
+        vacancies = list(vacancies_collection.find())
+        return render_template('index.html', items=vacancies, data_type="vacancies", active_page="vacancies")
+    except Exception as e:
+        return render_template('index.html', error=f"Ошибка при получении данных: {e}")
+
+@app.route('/vacancies')
+def show_vacancies():
+    """Отображает список вакансий."""
+    try:
+        vacancies = list(vacancies_collection.find())
+        return render_template('index.html', items=vacancies, data_type="vacancies", active_page="vacancies")
+    except Exception as e:
+        return render_template('index.html', error=f"Ошибка при получении данных: {e}")
+
+@app.route('/delete_vacancy/<vacancy_id>', methods=['POST'])
+def delete_vacancy(vacancy_id):
+    """Удаляет вакансию по ID."""
+    vacancies_collection.delete_one({"_id": ObjectId(vacancy_id)})
+    return redirect(url_for('show_vacancies'))
+
+@app.route('/edit_vacancy/<vacancy_id>', methods=['GET', 'POST'])
+def edit_vacancy(vacancy_id):
+    """Редактирует вакансию по ID."""
+    if request.method == 'POST':
+        title = request.form.get('title')
+        experience = request.form.get('experience')
+        skills = request.form.get('skills')
+        education = request.form.get('education')
+
+        vacancies_collection.update_one(
+            {"_id": ObjectId(vacancy_id)},
+            {"$set": {
+                "title": title,
+                "experience": experience,
+                "skills": skills,
+                "education": education
+            }}
+        )
+        return redirect(url_for('show_vacancies'))
+
+    vacancy = vacancies_collection.find_one({"_id": ObjectId(vacancy_id)})
+    return render_template('edit_vacancy.html', vacancy=vacancy)
+
+@app.route('/resumes')
+def show_resumes():
+    """Отображает список резюме."""
+    try:
+        resumes = list(users_collection.find())
+        return render_template('index.html', items=resumes, data_type="resumes", active_page="resumes")
     except Exception as e:
         return render_template('index.html', error=f"Ошибка при получении данных: {e}")
 

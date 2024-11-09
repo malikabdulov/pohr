@@ -98,6 +98,16 @@ def show_resumes():
     except Exception as e:
         return render_template('index.html', error=f"Ошибка при получении данных: {e}")
 
+@app.route('/ranging')
+def show_ranging():
+    """Отображает ранджирование."""
+    try:
+        resumes = list(users_collection.find())
+        resumes = convert_object_id(resumes)
+        return render_template('index.html', items=resumes, data_type="resumes", active_page="resumes")
+    except Exception as e:
+        return render_template('index.html', error=f"Ошибка при получении данных: {e}")
+
 @app.route('/create_vacancy', methods=['GET', 'POST'])
 def create_vacancy():
     """Страница для создания новой вакансии и сохранения в MongoDB."""

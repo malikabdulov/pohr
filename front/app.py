@@ -4,7 +4,7 @@ from bson import ObjectId
 from flask import Flask, render_template, request, redirect, url_for
 import requests
 from pymongo import MongoClient
-from db.mongo_controller import add_vacancy, get_all_vacancies, get_all_users
+from db.mongo_controller import add_vacancy, get_all_vacancies, get_all_resumes
 
 app = Flask(__name__)
 
@@ -95,4 +95,4 @@ def create_vacancy():
     return render_template('create_vacancy.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

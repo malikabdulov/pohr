@@ -1,10 +1,10 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from db.mongo_controller import get_all_users
+from db.mongo_controller import get_all_resumes
 
 # Загрузите пользователей и API-ключ
-users = get_all_users()
+users = get_all_resumes()
 load_dotenv()
 
 client = OpenAI(

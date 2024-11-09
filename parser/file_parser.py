@@ -1,4 +1,6 @@
 import os
+
+from db.mongo_controller import add_resumes
 from parse_utils import extract_text
 from gpt import parse_resume
 import json
@@ -38,5 +40,5 @@ if __name__ == '__main__':
     resumes_folder = 'files'
     
     result = process_resumes(resumes_folder)
-
+    add_resumes(result)
     print(result)

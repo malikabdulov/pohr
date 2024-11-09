@@ -94,43 +94,6 @@ const candidateData = {
     colors: ["#28a745", "#17a2b8", "#ffc107", "#007bff"]
 };
 
-// Инициализация диаграммы
-const ctx = document.getElementById("skillsChart").getContext("2d");
-const skillsChart = new Chart(ctx, {
-    type: "bar",
-    data: {
-        labels: candidateData.labels,
-        datasets: [{
-            data: candidateData.scores,
-            backgroundColor: candidateData.colors
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            tooltip: {
-                enabled: false // Отключаем встроенные подсказки
-            }
-        },
-        onClick: (e, activeElements) => {
-            if (activeElements.length) {
-                const index = activeElements[0].index;
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                max: 100,
-                title: {
-                    display: true,
-                    text: "Оценка (%)"
-                }
-            }
-        }
-    }
-});
-
-
 
 function generate_cover_letter(channel, jobDescription, resume, candidateName) {
     fetch('/generate_cover_letter', {

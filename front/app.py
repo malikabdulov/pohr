@@ -6,7 +6,7 @@ from elasticsearch import Elasticsearch
 from flask import Flask, render_template, request, redirect, url_for, jsonify, abort, send_from_directory
 from pymongo import MongoClient
 
-from db.mongo_controller import add_vacancy, add_resumes
+from db.mongo_controller import add_vacancy, add_resumes, get_all_vacancies
 from gpt.gpt import parse_resume
 from parser.file_parser import start_parse
 from parser.parse_utils import extract_text
@@ -113,15 +113,7 @@ def start_parse():
         process_resumes(folder)
     return jsonify({"status": "success"})
 
-@app.route('/ranging')
-def show_ranging():
-    """Отображает страницу ранжирования кандидатов."""
-    try:
-        resumes = list(users_collection.find())
-        resumes = convert_object_id(resumes)
-        return render_template('ranging.html', items=resumes, active_page="ranging")
-    except Exception as e:
-        return render_template('ranging.html', error=f"Ошибка при получении данных: {e}")
+
 
 @app.route('/create_vacancy', methods=['POST'])
 def create_vacancy():
@@ -259,7 +251,22 @@ def advanced_rank_resumes(technical_skills, soft_skills, cultural_fit, growth_po
 
     return [{"full_name":"Петров Алексей","relevance_score":92,"scores":{"technical_skills":95,"soft_skills":85,"cultural_fit":80,"growth_potential":90},"reasoning":{"technical_skills":"Обладает более чем 7 годами опыта в разработке сложных backend-решений, специализация в микросервисах и многопоточных приложениях.","soft_skills":"Демонстрирует менторство младшим разработчикам, что указывает на хорошие навыки коммуникации и лидерства.","cultural_fit":"Соответствие корпоративной культуре на уровне, готовность к переезду и обсуждению удаленной работы.","growth_potential":"Большой опыт и навыки позволяют предположить высокий потенциал для развития."},"missing_skills":[],"recommendations":""},{"full_name":"Кузнецова Анна","relevance_score":76,"scores":{"technical_skills":80,"soft_skills":80,"cultural_fit":70,"growth_potential":70},"reasoning":{"technical_skills":"Начальный уровень Java-разработчика с опытом стажировок в крупных компаниях, интерес к разработке веб-приложений и API.","soft_skills":"Демонстрирует умение работать в команде и обучаемость.","cultural_fit":"Небольшое расхождение с корпоративной культурой, но готовность работать удаленно.","growth_potential":"Потенциал для развития в профессиональном плане."},"missing_skills":[],"recommendations":""},{"full_name":"Салехова Диана","relevance_score":60,"scores":{"technical_skills":60,"soft_skills":80,"cultural_fit":70,"growth_potential":50},"reasoning":{"technical_skills":"Опыт в организации обучающих программ, но не прямая связь с автоматизированным тестированием.","soft_skills":"Хорошие навыки управления командой и переговоров.","cultural_fit":"Некоторое соответствие корпоративной культуре.","growth_potential":"Потенциал для развития в технической области."},"missing_skills":["Автоматизированное тестирование, Selenium, pytest"],"recommendations":"Рекомендуется дополнительное обучение по автоматизированному тестированию."}]
 
-
+# Новый маршрут для получения деталей вакансии по ID
+@app.route('/get_vacancy_details/<vacancy_id>', methods=['GET'])
+def get_vacancy_details(vacancy_id):
+    try:
+        vacancy = vacancies_collection.find_one({"_id": ObjectId(vacancy_id)})
+        if vacancy:
+            return jsonify({
+                "title": vacancy["title"],
+                "experience": vacancy["experience"],
+                "skills": vacancy["skills"],
+                "education": vacancy["education"]
+            })
+        else:
+            return jsonify({"error": "Vacancy not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/get_vacancy/<vacancy_id>', methods=['GET'])
 def get_vacancy(vacancy_id):

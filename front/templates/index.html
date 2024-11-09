@@ -128,16 +128,5 @@
         {% endif %}
     </div>
 
-    <!-- JavaScript для обработки кнопки "Поиск кандидатов" -->
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            document.querySelectorAll("[id^='searchCandidatesButton']").forEach(button => {
-                button.addEventListener("click", (event) => {
-                    const vacancyId = event.target.id.replace("searchCandidatesButton", "");
-                    alert(`Функционал поиска кандидатов для вакансии ID: ${vacancyId} будет добавлен позже.`);
-                });
-            });
-        });
-    </script>
 </body>
 </html>

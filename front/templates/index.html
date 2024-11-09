@@ -37,7 +37,6 @@
         border-radius: 5px;
     }
 
-    /* Стили для списка вакансий */
     .vacancy-item {
         background-color: #f0f0f0;
         border-left: 5px solid #007bff;
@@ -46,9 +45,8 @@
         margin-bottom: 15px;
     }
 
-    /* Стили для списка резюме */
     .resume-item {
-        background-color: #e8f5e9;
+        background-color: #f9f9f9;
         border-left: 5px solid #4caf50;
         padding: 15px;
         border-radius: 10px;
@@ -68,7 +66,6 @@
     </div>
 
     <div class="container mt-4">
-        <!-- Заголовок и кнопка создания вакансии -->
         <div class="header-section">
             <h1 class="mb-0">
                 {% if data_type == "vacancies" %}
@@ -112,14 +109,17 @@
                     {% endfor %}
                 {% elif data_type == "resumes" %}
                     <!-- Отображение списка резюме -->
-                    {% for item in items %}
+                    {% for resume in items %}
                         <div class="list-group-item resume-item">
-                            <h4>{{ item.full_name }}</h4>
-                            <p class="text-muted"><i class="bi bi-telephone"></i> {{ item.contact_info.phone }} | <i class="bi bi-envelope"></i> {{ item.contact_info.email }}</p>
-                            <p><strong>Описание:</strong> {{ item.summary }}</p>
+                            <h4>{{ resume.full_name }}</h4>
+                            <p class="text-muted">
+                                <i class="bi bi-telephone"></i> {{ resume.contact_info.phone }} |
+                                <i class="bi bi-envelope"></i> {{ resume.contact_info.email }}
+                            </p>
+                            <p><strong>Описание:</strong> {{ resume.summary }}</p>
                             <h5>Опыт работы:</h5>
                             <ul class="list-unstyled">
-                                {% for experience in item.work_experience %}
+                                {% for experience in resume.work_experience %}
                                     <li>
                                         <strong>{{ experience.position }}</strong> в {{ experience.company }}<br>
                                         <span class="text-muted">{{ experience.duration }}</span>
@@ -133,21 +133,30 @@
                             </ul>
                             <h5>Образование:</h5>
                             <ul class="list-unstyled">
-                                {% for edu in item.education %}
+                                {% for edu in resume.education %}
                                     <li>
                                         <strong>{{ edu.institution }}</strong> — {{ edu.degree }}<br>
-                                        <span class="text-muted">{{ edu.field }}, {{ edu.years }}</span>
+                                        <span class="text-muted">{{ edu.years }}</span>
                                     </li>
                                 {% endfor %}
                             </ul>
-                            <p><strong>Навыки:</strong> {{ item.skills | join(', ') }}</p>
-                            <h5>Языки:</h5>
-                            <ul class="list-inline">
-                                {% for language, proficiency in item.languages.items() %}
-                                    <li class="list-inline-item"><strong>{{ language }}:</strong> {{ proficiency }}</li>
+                            <p><strong>Навыки:</strong> {{ resume.skills | join(', ') }}</p>
+                            <h5>Сертификаты:</h5>
+                            <ul class="list-unstyled">
+                                {% for certificate in resume.certificates %}
+                                    <li>{{ certificate }}</li>
                                 {% endfor %}
                             </ul>
-                            <p><strong>Дополнительно:</strong> {{ item.add_info }}</p>
+                            <h5>Языки:</h5>
+                            <ul class="list-inline">
+                                {% for language in resume.languages %}
+                                    <li class="list-inline-item">
+                                        <strong>{{ language.language }}:</strong> {{ language.level }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <p><strong>Дополнительно:</strong> {{ resume.add_info }}</p>
+                            <p><strong>Исходный файл:</strong> <a href="{{ resume.source_file }}" target="_blank">Скачать резюме</a></p>
                         </div>
                     {% endfor %}
                 {% endif %}

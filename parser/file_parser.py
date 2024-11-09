@@ -1,9 +1,9 @@
 import os
 
+from parser.parse_utils import extract_text
+from parser.gpt import parse_resume
+
 from db.mongo_controller import add_resumes
-from parse_utils import extract_text
-from gpt import parse_resume
-import json
 
 
 def process_resumes(folder_path):
@@ -35,10 +35,13 @@ def process_resumes(folder_path):
 
     return parsed_resumes
 
+def start_parse():
+    resumes_folders = ['files', 'telegram_files']
+    for folder in resumes_folders:
+        result = process_resumes(folder)
+        add_resumes(result)
+    return 'Resumes successefully added to mongo'
+
 if __name__ == '__main__':
-    # Укажите путь к папке с резюме
-    resumes_folder = 'files'
-    
-    result = process_resumes(resumes_folder)
-    add_resumes(result)
-    print(result)
+    start_parse()
+

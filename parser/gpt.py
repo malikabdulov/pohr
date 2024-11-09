@@ -3,7 +3,7 @@ import os
 import re
 from dotenv import load_dotenv
 from openai import OpenAI
-from config import PROMPT
+from parser.config import PROMPT
 
 
 load_dotenv()

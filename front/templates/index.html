@@ -66,8 +66,8 @@
     </div>
 
     <div class="container mt-4">
-        <div class="header-section">
-            <h1 class="mb-0">
+        <div class="text-center mb-4">
+            <h1 class="mb-3">
                 {% if data_type == "vacancies" %}
                     Список вакансий
                 {% elif data_type == "resumes" %}
@@ -79,6 +79,16 @@
             {% endif %}
         </div>
 
+        <!-- Форма поиска -->
+        <div class="row justify-content-center my-4">
+            <div class="col-md-8 col-lg-6">
+                <form method="get" action="/search" class="d-flex">
+                    <input type="text" name="q" class="form-control me-2" placeholder="Введите запрос для поиска..." aria-label="Поиск">
+                    <button class="btn btn-primary" type="submit">Найти</button>
+                </form>
+            </div>
+        </div>
+
         {% if error %}
             <div class="alert alert-danger">{{ error }}</div>
         {% endif %}
@@ -88,23 +98,11 @@
                 {% if data_type == "vacancies" %}
                     <!-- Отображение списка вакансий -->
                     {% for item in items %}
-                        <div class="list-group-item vacancy-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5>{{ item.title }}</h5>
-                                <p><strong>Релевантный опыт:</strong> {{ item.experience }}</p>
-                                <p><strong>Навыки и компетенции:</strong> {{ item.skills }}</p>
-                                <p><strong>Образование и сертификация:</strong> {{ item.education }}</p>
-                            </div>
-                            <div>
-                                <a href="/edit_vacancy/{{ item._id }}" class="btn btn-outline-primary btn-sm mx-1">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <form action="/delete_vacancy/{{ item._id }}" method="post" style="display:inline;">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm mx-1">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
+                        <div class="list-group-item list-group-item-action vacancy-item">
+                            <h5>{{ item.title }}</h5>
+                            <p><strong>Релевантный опыт:</strong> {{ item.experience }}</p>
+                            <p><strong>Навыки и компетенции:</strong> {{ item.skills }}</p>
+                            <p><strong>Образование и сертификация:</strong> {{ item.education }}</p>
                         </div>
                     {% endfor %}
                 {% elif data_type == "resumes" %}
@@ -117,46 +115,7 @@
                                 <i class="bi bi-envelope"></i> {{ resume.contact_info.email }}
                             </p>
                             <p><strong>Описание:</strong> {{ resume.summary }}</p>
-                            <h5>Опыт работы:</h5>
-                            <ul class="list-unstyled">
-                                {% for experience in resume.work_experience %}
-                                    <li>
-                                        <strong>{{ experience.position }}</strong> в {{ experience.company }}<br>
-                                        <span class="text-muted">{{ experience.duration }}</span>
-                                        <ul>
-                                            {% for responsibility in experience.responsibilities %}
-                                                <li>{{ responsibility }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            <h5>Образование:</h5>
-                            <ul class="list-unstyled">
-                                {% for edu in resume.education %}
-                                    <li>
-                                        <strong>{{ edu.institution }}</strong> — {{ edu.degree }}<br>
-                                        <span class="text-muted">{{ edu.years }}</span>
-                                    </li>
-                                {% endfor %}
-                            </ul>
                             <p><strong>Навыки:</strong> {{ resume.skills | join(', ') }}</p>
-                            <h5>Сертификаты:</h5>
-                            <ul class="list-unstyled">
-                                {% for certificate in resume.certificates %}
-                                    <li>{{ certificate }}</li>
-                                {% endfor %}
-                            </ul>
-                            <h5>Языки:</h5>
-                            <ul class="list-inline">
-                                {% for language in resume.languages %}
-                                    <li class="list-inline-item">
-                                        <strong>{{ language.language }}:</strong> {{ language.level }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            <p><strong>Дополнительно:</strong> {{ resume.add_info }}</p>
-                            <p><strong>Исходный файл:</strong> <a href="{{ resume.source_file }}" target="_blank">Скачать резюме</a></p>
                         </div>
                     {% endfor %}
                 {% endif %}
@@ -165,5 +124,17 @@
             <p class="text-center">Нет доступных данных.</p>
         {% endif %}
     </div>
+
+    <!-- JavaScript для обработки кнопки "Поиск кандидатов" -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll("[id^='searchCandidatesButton']").forEach(button => {
+                button.addEventListener("click", (event) => {
+                    const vacancyId = event.target.id.replace("searchCandidatesButton", "");
+                    alert(`Функционал поиска кандидатов для вакансии ID: ${vacancyId} будет добавлен позже.`);
+                });
+            });
+        });
+    </script>
 </body>
 </html>

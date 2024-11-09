@@ -1,7 +1,8 @@
 import os
 
 from bson import ObjectId
-from flask import Flask, render_template, request, redirect, url_for
+from elasticsearch import Elasticsearch
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import requests
 from pymongo import MongoClient
 from db.mongo_controller import add_vacancy, get_all_vacancies, get_all_resumes
@@ -13,6 +14,7 @@ client = MongoClient(os.getenv('MONGO_YURI'))
 db = client["my_database"]
 vacancies_collection = db["vacancies"]
 users_collection = db["resumes"]
+es = Elasticsearch(os.getenv("ES_CLOUD_URL"), basic_auth=(os.getenv("ES_USERNAME"), os.getenv("ES_PASSWORD")))
 
 @app.route('/')
 def index():
@@ -61,6 +63,20 @@ def edit_vacancy(vacancy_id):
     vacancy = vacancies_collection.find_one({"_id": ObjectId(vacancy_id)})
     return render_template('edit_vacancy.html', vacancy=vacancy)
 
+@app.route('/update_vacancy/<vacancy_id>', methods=['POST'])
+def update_vacancy(vacancy_id):
+    data = request.json
+    title = data.get('title')
+    description = data.get('description')
+
+    if title and description:
+        vacancies_collection.update_one(
+            {'_id': ObjectId(vacancy_id)},
+            {'$set': {'title': title, 'description': description}}
+        )
+        return jsonify({'status': 'success'}), 200
+    return jsonify({'status': 'error', 'message': 'Invalid data'}), 400
+
 def convert_object_id(data):
     """Конвертирует ObjectId в строку и обрабатывает вложенные данные."""
     if isinstance(data, dict):
@@ -105,6 +121,43 @@ def create_vacancy():
                 return render_template('create_vacancy.html', error=f"Ошибка при сохранении: {e}")
         return render_template('create_vacancy.html', error="Заполните все поля.")
     return render_template('create_vacancy.html')
+
+@app.route('/search', methods=['GET'])
+def search():
+    """Выполняет поиск по вакансиям и резюме в Elasticsearch."""
+    query = request.args.get("q", "").strip()
+    if not query:
+        return render_template('index.html', error="Введите поисковый запрос.")
+
+    try:
+        # Поиск по вакансиям
+        vacancies_response = es.search(index="vacancies", body={
+            "query": {
+                "multi_match": {
+                    "query": query,
+                    "fields": ["title", "experience", "skills", "education"]
+                }
+            }
+        })
+
+        # Поиск по резюме
+        resumes_response = es.search(index="resumes", body={
+            "query": {
+                "multi_match": {
+                    "query": query,
+                    "fields": ["full_name", "summary", "skills", "work_experience.position"]
+                }
+            }
+        })
+
+        # Извлекаем результаты поиска
+        vacancies = [hit["_source"] for hit in vacancies_response["hits"]["hits"]]
+        resumes = [hit["_source"] for hit in resumes_response["hits"]["hits"]]
+
+        return render_template('search_results.html', query=query, vacancies=vacancies, resumes=resumes)
+
+    except Exception as e:
+        return render_template('index.html', error=f"Ошибка при поиске: {e}")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

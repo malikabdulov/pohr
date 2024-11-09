@@ -1,7 +1,8 @@
 import os
 
+from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
-
+load_dotenv()
 # URL вашего кластера и учетные данные
 CLOUD_URL = os.getenv("ES_CLOUD_URL")
 USERNAME = os.getenv("ES_USERNAME")

@@ -1,7 +1,8 @@
+import asyncio
 from dotenv import load_dotenv
 import os
 import logging
-from telegram import Update
+from telegram import Update, Bot
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 load_dotenv()
@@ -46,27 +47,19 @@ async def handle_resume(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("Пожалуйста, отправьте файл в формате PDF или DOC.")
 
-# Функция отправки сообщения пользователю по chat_id
-async def send_message_to_user(chat_id: int, message: str, context: ContextTypes.DEFAULT_TYPE):
+# Асинхронная функция для отправки сообщения пользователю по chat_id
+async def send_message_async(chat_id: int, message: str):
+    bot = Bot(token=token)
     try:
-        await context.bot.send_message(chat_id=chat_id, text=message)
+        await bot.send_message(chat_id=chat_id, text=message)
         logger.info(f"Сообщение отправлено пользователю {chat_id}: {message}")
     except Exception as e:
         logger.error(f"Ошибка при отправке сообщения пользователю {chat_id}: {e}")
 
-# Функция для администраторов, которая вызывается через интерфейс админки
-async def admin_send_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not context.args or len(context.args) < 2:
-        await update.message.reply_text("Использование: /send <chat_id> <сообщение>")
-        return
-    
-    # Извлекаем chat_id и сообщение из аргументов команды
-    chat_id = int(context.args[0])
-    message = " ".join(context.args[1:])
-    
-    # Отправляем сообщение пользователю
-    await send_message_to_user(chat_id, message, context)
-    await update.message.reply_text(f"Сообщение отправлено пользователю с chat_id {chat_id}")
+
+# Синхронная обертка для вызова send_message_async из обычного кода
+def send_message(chat_id: int, message: str):
+    asyncio.run(send_message_async(chat_id, message))
 
 # Основная функция запуска бота
 def main():
@@ -78,9 +71,6 @@ def main():
     
     # Обработчик для сообщений с документами (резюме)
     application.add_handler(MessageHandler(filters.Document.ALL, handle_resume))
-    
-    # Обработчик для команды /send, которую администратор будет использовать для отправки сообщений
-    application.add_handler(CommandHandler("send", admin_send_message))
 
     # Запуск бота
     application.run_polling()

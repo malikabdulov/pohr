@@ -1,7 +1,7 @@
 import os
 
 from parser.parse_utils import extract_text
-from parser.gpt import parse_resume
+from gpt.gpt import parse_resume
 
 from db.mongo_controller import add_resumes
 

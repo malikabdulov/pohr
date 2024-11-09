@@ -177,7 +177,7 @@ def rank_resumes(job_description, resumes):
     print(assistant_reply)
     return assistant_reply.splitlines()
 
-def advanced_rank_resumes(job_description, 
+def ai_rank_resumes(job_description, 
                           resumes, 
                           model=MODEL, 
                           temperature=0.0,

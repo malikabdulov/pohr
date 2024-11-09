@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">Список вакансий</h2>
+
+    <!-- Кнопка добавления новой вакансии -->
+    <div class="text-end mb-3">
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addVacancyModal">
+            <i class="bi bi-plus-circle"></i> Добавить вакансию
+        </button>
+    </div>
+
+    <!-- Список вакансий -->
+    <div class="list-group">
+        {% for vacancy in items %}
+        <a href="#" class="list-group-item list-group-item-action bg-dark text-white">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ vacancy['title'] }}</h5>
+                <small class="text-muted">{{ vacancy['company'] }}</small>
+            </div>
+            <p class="mb-1">{{ vacancy['description'] }}</p>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-outline-primary btn-sm me-2" onclick="editVacancy('{{ vacancy['_id'] }}')">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="deleteVacancy('{{ vacancy['_id'] }}')">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </a>
+        {% else %}
+        <div class="list-group-item list-group-item-dark text-center">
+            Нет доступных вакансий
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Модальное окно для добавления вакансии -->
+<div class="modal fade" id="addVacancyModal" tabindex="-1" aria-labelledby="addVacancyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addVacancyModalLabel">Добавить вакансию</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addVacancyForm">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Название вакансии</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="company" class="form-label">Компания</label>
+                        <input type="text" class="form-control" id="company" name="company" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Описание</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Добавить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Обработка формы добавления вакансии
+    document.getElementById('addVacancyForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+
+        const response = await fetch('/add_vacancy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert('Вакансия добавлена успешно!');
+            location.reload();
+        } else {
+            alert('Ошибка при добавлении вакансии');
+        }
+    });
+
+    // Функции редактирования и удаления вакансий
+    function editVacancy(id) {
+        console.log("Edit vacancy with ID:", id);
+        // Здесь можно добавить вызов модального окна для редактирования
+    }
+
+    async function deleteVacancy(id) {
+        if (confirm("Вы уверены, что хотите удалить эту вакансию?")) {
+            const response = await fetch(`/delete_vacancy/${id}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.success) {
+                alert('Вакансия удалена успешно!');
+                location.reload();
+            } else {
+                alert('Ошибка при удалении вакансии');
+            }
+        }
+    }
+</script>
+{% endblock %}

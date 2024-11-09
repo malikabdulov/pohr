@@ -53,3 +53,9 @@ python -m front.app
 ```bash
 python parser/file_parser.py
 ```
+
+# Запуск Телеграм-бота
+Для запуска Телеграм-бота, который принимает и сохраняет резюме от кандидатов, выполните следующую команду:
+```bash
+python telegram_bot/main.py
+```

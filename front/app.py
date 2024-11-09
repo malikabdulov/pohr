@@ -1,9 +1,12 @@
 import os
 from bson import ObjectId
 from elasticsearch import Elasticsearch
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, abort, send_from_directory
 from pymongo import MongoClient
-from db.mongo_controller import add_vacancy
+from db.mongo_controller import add_vacancy, add_resumes
+from gpt.gpt import parse_resume
+from parser.file_parser import start_parse
+from parser.parse_utils import extract_text
 
 app = Flask(__name__)
 
@@ -13,7 +16,7 @@ db = client["my_database"]
 vacancies_collection = db["vacancies"]
 users_collection = db["resumes"]
 es = Elasticsearch(os.getenv("ES_CLOUD_URL"), basic_auth=(os.getenv("ES_USERNAME"), os.getenv("ES_PASSWORD")))
-
+parsed_files = set()
 # Конвертация ObjectId в строку
 def convert_object_id(data):
     if isinstance(data, dict):
@@ -48,6 +51,61 @@ def show_resumes():
         return render_template('resumes.html', items=resumes, active_page="resumes")
     except Exception as e:
         return render_template('resumes.html', error=f"Ошибка при получении данных: {e}")
+
+def process_resumes(folder_path):
+    supported_extensions = ['.txt', '.pdf', '.docx']
+    files = []
+
+    # Собираем все файлы из директории
+    for root, _, file_list in os.walk(folder_path):
+        for file in file_list:
+            file_path = os.path.join(root, file)
+            _, ext = os.path.splitext(file.lower())
+
+            if ext not in supported_extensions:
+                continue
+
+            # Проверка, спарсился ли файл ранее
+            if file not in parsed_files:
+                print(f"Обработка файла: {file_path}")
+                resume_text = extract_text(file_path)
+                if resume_text:
+                    parsed_data = parse_resume(resume_text)
+                    if parsed_data:
+                        parsed_data['source_file'] = file_path
+                        add_resumes([parsed_data])
+                        parsed_files.add(file)
+                        print(f"Файл успешно спаршен: {file}")
+                    else:
+                        print(f"Не удалось спарсить файл: {file}")
+                else:
+                    print(f"Не удалось извлечь текст из файла: {file}")
+
+@app.route('/parsing')
+def parsing():
+    # Собираем список всех файлов из директорий
+    directories = ['files', 'telegram_files']
+    all_files = []
+
+    for directory in directories:
+        if os.path.exists(directory):
+            for file_name in os.listdir(directory):
+                # Проверяем, спарсился ли файл
+                file_status = 'parsed' if file_name in parsed_files else 'pending'
+                all_files.append({
+                    'name': file_name,
+                    'directory': directory,
+                    'status': file_status
+                })
+
+    return render_template('parsing.html', files=all_files)
+
+@app.route('/start_parse', methods=['POST'])
+def start_parse():
+    # Запускаем процесс парсинга
+    for folder in ['files', 'telegram_files']:
+        process_resumes(folder)
+    return jsonify({"status": "success"})
 
 @app.route('/ranging')
 def show_ranging():

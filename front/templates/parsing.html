@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Парсинг файлов{% endblock %}
+{% block title_header %}Список файлов для парсинга{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <button id="parseButton" class="btn btn-success btn-lg">
+            <i class="bi bi-arrow-repeat"></i> Спарсить файлы
+        </button>
+        <div id="loading" class="spinner-border text-primary d-none" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Список файлов -->
+    <ul id="fileList" class="list-group">
+        {% for file in files %}
+            <li class="list-group-item {% if file.status == 'parsed' %}list-group-item-success{% else %}list-group-item-warning{% endif %}">
+                {{ file.name }} ({{ file.directory }})
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+    const parseButton = document.getElementById('parseButton');
+    const loadingIndicator = document.getElementById('loading');
+
+    // Обработчик кнопки "Спарсить файлы"
+    parseButton.addEventListener('click', () => {
+        parseButton.disabled = true;
+        loadingIndicator.classList.remove('d-none');
+
+        // Отправляем запрос на начало парсинга
+        fetch('/start_parse', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload(); // Перезагружаем страницу для обновления списка файлов
+            } else {
+                console.error('Ошибка при старте парсинга:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Произошла ошибка при старте парсинга:', error);
+        });
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Список резюме{% endblock %}
+{% block title_header %}Список резюме{% endblock %}
+{% block content %}
+<style>
+        /* Стили для карточек резюме */
+    .resume-card {
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .resume-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Стили для кнопок */
+    .btn-success {
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    /* Стили для страницы */
+    body {
+        background-color: #f0f4f7;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Стили для поля поиска */
+    #searchInput {
+        font-size: 1.2rem;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+    }
+
+    /* Стили для заголовка страницы */
+    .page-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 2.5rem;
+        color: #007bff;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* Стили для модального окна */
+    .modal-header {
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
+</style>
+
+<!-- Поле поиска -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <input type="text" class="form-control form-control-lg" id="searchInput" placeholder="🔍 Поиск резюме...">
+    </div>
+</div>
+
+<!-- Список резюме -->
+<div id="resumeList" class="list-group">
+    {% for resume in items %}
+        <div class="list-group-item list-group-item-action mb-3 vacancy-card">
+            <div>
+                <h5 class="text-primary vacancy-title">{{ resume.full_name }}</h5>
+                <p class="mb-1"><strong>Телефон:</strong> <span class="resume-phone">{{ resume.contact_info.phone }}</span></p>
+                <p class="mb-1"><strong>Email:</strong> <span class="resume-email">{{ resume.contact_info.email }}</span></p>
+                <p class="mb-1"><strong>Описание:</strong> {{ resume.summary }}</p>
+                <p class="mb-1"><strong>Навыки:</strong> {{ resume.skills | join(', ') }}</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- JavaScript для фильтрации резюме -->
+<script>
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const resumes = document.querySelectorAll('#resumeList .list-group-item');
+
+        resumes.forEach(function(resume) {
+            const fullName = resume.querySelector('.vacancy-title').textContent.toLowerCase();
+            const phone = resume.querySelector('.resume-phone').textContent.toLowerCase();
+            const email = resume.querySelector('.resume-email').textContent.toLowerCase();
+            const summary = resume.querySelector('.mb-1').textContent.toLowerCase();
+            const skills = resume.textContent.toLowerCase();
+
+            // Проверяем, содержит ли текст резюме поисковый запрос
+            if (fullName.includes(query) || phone.includes(query) || email.includes(query) || summary.includes(query) || skills.includes(query)) {
+                resume.style.display = 'block';
+            } else {
+                resume.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+{% endblock %}

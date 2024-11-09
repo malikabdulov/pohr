@@ -1,19 +1,24 @@
 import os
 from pkgutil import get_data
 from bson import ObjectId
+from dotenv import load_dotenv
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
 
 from db.database import get_database
+from front.app import vacancies_collection
 
+load_dotenv()
 # Подключение к MongoDB
 db = get_database()
 resumes_collection = db["resumes"]
+vacancies_collection_collection = db["vacancies"]
 CLOUD_URL = os.getenv("ES_CLOUD_URL")
 USERNAME = os.getenv("ES_USERNAME")
 PASSWORD = os.getenv("ES_PASSWORD")
 # Подключение к Elastic Cloud
 es = Elasticsearch(CLOUD_URL, basic_auth=(USERNAME, PASSWORD))
+
 
 
 
@@ -43,5 +48,27 @@ def index_resumes():
         except Exception as e:
             print(f"Ошибка при индексации резюме {doc_id}: {e}")
 
+
+def index_vacancies():
+    """Индексирует все вакансии из MongoDB в Elasticsearch."""
+    try:
+        # Получаем все вакансии из MongoDB
+        vacancies = list(vacancies_collection.find())
+
+        for vacancy in vacancies:
+            # Преобразуем _id в строку и готовим данные для Elasticsearch
+            doc_id = str(vacancy["_id"])
+            clean_vacancy = prepare_for_elasticsearch(vacancy)
+
+            # Индексация документа в Elasticsearch
+            es.index(index="vacancies", id=doc_id, document=clean_vacancy)
+            print(f"Вакансия {doc_id} успешно проиндексирована.")
+
+        print("Все вакансии успешно проиндексированы.")
+
+    except Exception as e:
+        print(f"Ошибка при индексации: {e}")
+
 if __name__ == "__main__":
     index_resumes()
+    index_vacancies()

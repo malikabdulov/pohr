@@ -61,11 +61,23 @@ def edit_vacancy(vacancy_id):
     vacancy = vacancies_collection.find_one({"_id": ObjectId(vacancy_id)})
     return render_template('edit_vacancy.html', vacancy=vacancy)
 
+def convert_object_id(data):
+    """Конвертирует ObjectId в строку и обрабатывает вложенные данные."""
+    if isinstance(data, dict):
+        return {key: convert_object_id(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [convert_object_id(item) for item in data]
+    elif isinstance(data, ObjectId):
+        return str(data)
+    else:
+        return data
+
 @app.route('/resumes')
 def show_resumes():
     """Отображает список резюме."""
     try:
         resumes = list(users_collection.find())
+        resumes = convert_object_id(resumes)
         return render_template('index.html', items=resumes, data_type="resumes", active_page="resumes")
     except Exception as e:
         return render_template('index.html', error=f"Ошибка при получении данных: {e}")

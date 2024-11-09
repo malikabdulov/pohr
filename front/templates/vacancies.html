@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+
+{% block title %}Список вакансий{% endblock %}
+{% block title_header %}Список вакансий{% endblock %}
+
+{% block content %}
+<style>
+    .vacancy-card {
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+
+    .btn-success {
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    body {
+        background-color: #f0f4f7;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .vacancy-card {
+        border-radius: 10px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .vacancy-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar {
+        background-color: #e3f2fd;
+    }
+
+    .btn-outline-primary {
+        color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+    }
+</style>
+
+
+<!-- Контент -->
+<div class="container mt-5 pt-5">
+    <div class="text-center mb-4">
+        <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createVacancyModal">
+            <i class="bi bi-plus-circle"></i> Создать вакансию
+        </button>
+    </div>
+
+    <!-- Поле поиска -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <input type="text" class="form-control form-control-lg" id="searchInput" placeholder="🔍 Поиск вакансий...">
+        </div>
+    </div>
+
+    <!-- Список вакансий -->
+    <div id="vacancyList" class="list-group">
+        {% for item in items %}
+            <div class="list-group-item list-group-item-action mb-3 vacancy-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="text-primary vacancy-title">{{ item.title }}</h5>
+                        <p class="mb-1"><strong>Опыт:</strong> <span class="vacancy-experience">{{ item.experience }}</span></p>
+                        <p class="mb-1"><strong>Навыки:</strong> <span class="vacancy-skills">{{ item.skills }}</span></p>
+                        <p class="mb-1"><strong>Образование:</strong> <span class="vacancy-education">{{ item.education }}</span></p>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary me-2 edit-button" data-bs-toggle="modal" data-bs-target="#editVacancyModal" data-id="{{ item._id }}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger delete-button" data-id="{{ item._id }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+ <!--Модальное окно для создания вакансии -->
+<div class="modal fade" id="createVacancyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Создать вакансию</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createVacancyForm">
+                    <div class="mb-3">
+                        <input type="text" name="title" class="form-control" placeholder="Название вакансии" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" name="experience" class="form-control" placeholder="Опыт работы" required>
+                    </div>
+                    <div class="mb-3">
+                        <textarea name="skills" class="form-control" placeholder="Навыки и компетенции" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" name="education" class="form-control" placeholder="Образование" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Создать</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Модальное окно для редактирования вакансии -->
+<div class="modal fade" id="editVacancyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактировать вакансию</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editVacancyForm">
+                    <input type="hidden" id="editVacancyId">
+                    <div class="mb-3">
+                        <input type="text" id="editTitle" class="form-control" placeholder="Название вакансии" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="editExperience" class="form-control" placeholder="Опыт работы" required>
+                    </div>
+                    <div class="mb-3">
+                        <textarea id="editSkills" class="form-control" placeholder="Навыки и компетенции" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="editEducation" class="form-control" placeholder="Образование" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Сохранить изменения</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Вы действительно хотите удалить эту вакансию?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" id="confirmDeleteButton" class="btn btn-danger">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- JavaScript для AJAX-запроса -->
+<script>
+     let currentVacancyId = null;
+
+    // Обработчик кнопки "Редактировать"
+    document.querySelectorAll('.edit-button').forEach(button => {
+        button.addEventListener('click', function () {
+            currentVacancyId = this.getAttribute('data-id');
+
+            // Загружаем данные вакансии через AJAX-запрос
+            fetch(`/get_vacancy/${currentVacancyId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('editTitle').value = data.title;
+                    document.getElementById('editExperience').value = data.experience;
+                    document.getElementById('editSkills').value = data.skills;
+                    document.getElementById('editEducation').value = data.education;
+
+                    const editModal = new bootstrap.Modal(document.getElementById('editVacancyModal'));
+                    editModal.show();
+                })
+                .catch(error => {
+                    console.error('Ошибка при загрузке данных:', error);
+                });
+        });
+    });
+
+    // Обработчик отправки формы редактирования
+    document.getElementById('editVacancyForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const vacancyId = currentVacancyId;
+        const title = document.getElementById('editTitle').value;
+        const experience = document.getElementById('editExperience').value;
+        const skills = document.getElementById('editSkills').value;
+        const education = document.getElementById('editEducation').value;
+
+        fetch(`/update_vacancy/${vacancyId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                title: title,
+                experience: experience,
+                skills: skills,
+                education: education
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Закрываем модальное окно с использованием Bootstrap API
+                const editModal = bootstrap.Modal.getInstance(document.getElementById('editVacancyModal'));
+                editModal.hide();
+
+                // Удаляем оставшийся оверлей вручную, если он остаётся
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+
+                // Обновляем данные в карточке вакансии на странице
+                const vacancyCard = document.querySelector(`[data-id="${vacancyId}"]`).closest('.list-group-item');
+                vacancyCard.querySelector('.vacancy-title').textContent = title;
+                vacancyCard.querySelector('.vacancy-experience').textContent = experience;
+                vacancyCard.querySelector('.vacancy-skills').textContent = skills;
+                vacancyCard.querySelector('.vacancy-education').textContent = education;
+            } else {
+                console.error('Ошибка при обновлении:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Произошла ошибка при обновлении:', error);
+        });
+    });
+
+    // Очистка формы и удаление оверлея при закрытии модального окна
+    const editVacancyModal = document.getElementById('editVacancyModal');
+    editVacancyModal.addEventListener('hidden.bs.modal', () => {
+        document.getElementById('editVacancyForm').reset();
+        currentVacancyId = null;
+
+        // Удаляем оставшийся оверлей вручную
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+    });
+
+
+let deleteVacancyId = null;
+
+    // Обработчик кнопки удаления
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', function () {
+            // Сохраняем ID вакансии и показываем модальное окно подтверждения
+            deleteVacancyId = this.getAttribute('data-id');
+            const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            confirmDeleteModal.show();
+        });
+    });
+
+    // Обработчик кнопки подтверждения удаления
+    document.getElementById('confirmDeleteButton').addEventListener('click', function () {
+        if (deleteVacancyId) {
+            // Отправляем DELETE-запрос на сервер
+            fetch(`/delete_vacancy/${deleteVacancyId}`, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Удаляем карточку вакансии из DOM
+                    document.querySelector(`[data-id="${deleteVacancyId}"]`).closest('.list-group-item').remove();
+                } else {
+                    alert('Ошибка: ' + data.message);
+                }
+                // Закрываем модальное окно
+                const confirmDeleteModal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
+                confirmDeleteModal.hide();
+            })
+            .catch(error => {
+                alert('Произошла ошибка при удалении: ' + error);
+                const confirmDeleteModal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
+                confirmDeleteModal.hide();
+            });
+        }
+    });
+
+
+
+    document.getElementById('createVacancyForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+
+        fetch('/create_vacancy', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+
+                location.reload(); // Перезагрузка страницы для обновления списка вакансий
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            alert('Произошла ошибка: ' + error);
+        });
+    });
+
+
+
+<!-- JavaScript для фильтрации вакансий -->
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const vacancies = document.querySelectorAll('#vacancyList .list-group-item');
+
+        vacancies.forEach(function(vacancy) {
+            const title = vacancy.querySelector('.vacancy-title').textContent.toLowerCase();
+            const experience = vacancy.querySelector('.vacancy-experience').textContent.toLowerCase();
+            const skills = vacancy.querySelector('.vacancy-skills').textContent.toLowerCase();
+            const education = vacancy.querySelector('.vacancy-education').textContent.toLowerCase();
+
+            // Проверяем, содержит ли текст вакансии поисковый запрос
+            if (title.includes(query) || experience.includes(query) || skills.includes(query) || education.includes(query)) {
+                vacancy.style.display = 'block';
+            } else {
+                vacancy.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+{% endblock %}

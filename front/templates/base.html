@@ -1,0 +1,85 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HR Система{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background-color: #f0f4f7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background-color: #e3f2fd;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .navbar-nav .nav-link {
+            font-size: 18px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .navbar-nav .active {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .container {
+            margin-top: 80px;
+        }
+
+        body {
+            background-color: #f0f4f7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .page-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 150px; /* Высота заголовка для центрирования по вертикали */
+            margin-top: 20px;
+        }
+        .page-title {
+            font-weight: bold;
+            font-size: 2.5rem;
+            color: #007bff;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Фиксированный навбар -->
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand text-primary" href="/">HR Система</a>
+            <div class="navbar-nav">
+                <a href="/vacancies" class="nav-link {% if active_page == 'vacancies' %}active{% endif %}">Вакансии</a>
+                <a href="/resumes" class="nav-link {% if active_page == 'resumes' %}active{% endif %}">Резюме</a>
+                <a href="/ranging" class="nav-link {% if active_page == 'ranging' %}active{% endif %}">Подбор кандидатов</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Общий заголовок страницы -->
+    <div class="container">
+        <h1 class="page-title">{% block title_header %}{% endblock %}</h1>
+    </div>
+
+    <!-- Основной контент страницы -->
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

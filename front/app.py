@@ -205,6 +205,37 @@ def search():
     if not query:
         return render_template('search_results.html', error="Введите поисковый запрос.")
 
+    try:
+        # Поиск по вакансиям
+        vacancies_response = es.search(index="vacancies", body={
+            "query": {
+                "multi_match": {
+                    "query": query,
+                    "fields": ["title", "experience", "skills", "education"]
+                }
+            }
+        })
+
+        # Поиск по резюме
+        resumes_response = es.search(index="resumes", body={
+            "query": {
+                "multi_match": {
+                    "query": query,
+                    "fields": ["full_name", "summary", "skills", "work_experience.position"]
+                }
+            }
+        })
+
+        # Извлекаем результаты поиска
+        vacancies = [hit["_source"] for hit in vacancies_response["hits"]["hits"]]
+        resumes = [hit["_source"] for hit in resumes_response["hits"]["hits"]]
+
+        return render_template('search_results.html', query=query, vacancies=vacancies, resumes=resumes)
+
+    except Exception as e:
+        return render_template('search_results.html', error=f"Ошибка при поиске: {e}")
+    
+
 # Пример функции advanced_rank_resumes с параметрами для весов
 def advanced_rank_resumes(technical_skills, soft_skills, cultural_fit, growth_potential, vacancy_id):
     # Здесь будет логика ранжирования резюме, используя vacancy_id и весовые коэффициенты
@@ -227,10 +258,6 @@ def advanced_rank_resumes(technical_skills, soft_skills, cultural_fit, growth_po
     # return ranked_resumes
 
     return [{"full_name":"Петров Алексей","relevance_score":92,"scores":{"technical_skills":95,"soft_skills":85,"cultural_fit":80,"growth_potential":90},"reasoning":{"technical_skills":"Обладает более чем 7 годами опыта в разработке сложных backend-решений, специализация в микросервисах и многопоточных приложениях.","soft_skills":"Демонстрирует менторство младшим разработчикам, что указывает на хорошие навыки коммуникации и лидерства.","cultural_fit":"Соответствие корпоративной культуре на уровне, готовность к переезду и обсуждению удаленной работы.","growth_potential":"Большой опыт и навыки позволяют предположить высокий потенциал для развития."},"missing_skills":[],"recommendations":""},{"full_name":"Кузнецова Анна","relevance_score":76,"scores":{"technical_skills":80,"soft_skills":80,"cultural_fit":70,"growth_potential":70},"reasoning":{"technical_skills":"Начальный уровень Java-разработчика с опытом стажировок в крупных компаниях, интерес к разработке веб-приложений и API.","soft_skills":"Демонстрирует умение работать в команде и обучаемость.","cultural_fit":"Небольшое расхождение с корпоративной культурой, но готовность работать удаленно.","growth_potential":"Потенциал для развития в профессиональном плане."},"missing_skills":[],"recommendations":""},{"full_name":"Салехова Диана","relevance_score":60,"scores":{"technical_skills":60,"soft_skills":80,"cultural_fit":70,"growth_potential":50},"reasoning":{"technical_skills":"Опыт в организации обучающих программ, но не прямая связь с автоматизированным тестированием.","soft_skills":"Хорошие навыки управления командой и переговоров.","cultural_fit":"Некоторое соответствие корпоративной культуре.","growth_potential":"Потенциал для развития в технической области."},"missing_skills":["Автоматизированное тестирование, Selenium, pytest"],"recommendations":"Рекомендуется дополнительное обучение по автоматизированному тестированию."}]
-
-
-    except Exception as e:
-        return render_template('search_results.html', error=f"Ошибка при поиске: {e}")
 
 
 

@@ -128,6 +128,11 @@
                 <p class="resume-info mb-1"><strong>Email:</strong> <span class="resume-email">{{ resume.contact_info.email }}</span></p>
                 <p class="resume-info mb-1"><strong>Описание:</strong> {{ resume.summary }}</p>
                 <p class="resume-info mb-1"><strong>Навыки:</strong> {{ resume.skills | join(', ') }}</p>
+                {% if not resume.reliability.reliable %}
+                    <div class="reliability-warning">
+                        <strong>Причина ненадежности:</strong> {{ resume.reliability.reliable_reason }}
+                    </div>
+                {% endif %}
             </div>
                         <!-- Проверка надежности кандидата -->
             {% if resume.reliability and not resume.reliability.reliable %}

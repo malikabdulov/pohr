@@ -95,7 +95,7 @@ const candidateData = {
 };
 
 
-function generate_cover_letter(channel, jobDescription, resume, candidateName) {
+function generate_cover_letter(channel, jobDescription, candidateName) {
     fetch('/generate_cover_letter', {
         method: 'POST',
         headers: {
@@ -104,7 +104,6 @@ function generate_cover_letter(channel, jobDescription, resume, candidateName) {
         body: JSON.stringify({
             channel: channel,
             job_description: jobDescription,
-            resume: resume,
             candidate_name: candidateName
         })
     })

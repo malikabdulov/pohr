@@ -44,3 +44,18 @@ def find_vacancy_by_id(vacancy_id):
     except Exception as e:
         return {"error": str(e)}
 
+
+
+# Функция для поиска вакансии по ID
+def find_resume_by_name(full_name):
+    collection = db["resumes"]
+    try:
+        # Ищем вакансию по ObjectId
+        resume = collection.find_one({"full_name": full_name})
+        if resume:
+            return resume
+        else:
+            return {"error": "resume не найдена"}
+    except Exception as e:
+        return {"error": str(e)}
+    

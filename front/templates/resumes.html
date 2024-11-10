@@ -2,32 +2,43 @@
 
 {% block title %}Список резюме{% endblock %}
 {% block title_header %}Список резюме{% endblock %}
+
 {% block content %}
 <style>
-        /* Стили для карточек резюме */
+    /* Стили для карточек резюме */
     .resume-card {
         border-radius: 10px;
         background-color: #ffffff;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         padding: 20px;
+        margin-bottom: 20px;
         transition: transform 0.2s, box-shadow 0.2s;
+        border-left: 5px solid #28a745;
     }
 
     .resume-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        border-left: 5px solid #66bb6a;
     }
 
     /* Стили для кнопок */
     .btn-success {
         font-weight: bold;
         font-size: 16px;
+        background-color: #28a745;
+        border: none;
+        color: #fff;
+    }
+
+    .btn-success:hover {
+        background-color: #66bb6a;
     }
 
     /* Стили для страницы */
     body {
         background-color: #f0f4f7;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Roboto', sans-serif;
     }
 
     /* Стили для поля поиска */
@@ -35,11 +46,12 @@
         font-size: 1.2rem;
         padding: 10px;
         border-radius: 8px;
+        border: 1px solid #28a745;
     }
 
     .form-control:focus {
-        border-color: #80bdff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+        border-color: #66bb6a;
+        box-shadow: 0 0 5px rgba(102, 187, 106, 0.5);
     }
 
     /* Стили для заголовка страницы */
@@ -47,16 +59,29 @@
         text-align: center;
         font-weight: bold;
         font-size: 2.5rem;
-        color: #007bff;
+        color: #28a745;
         margin-top: 20px;
         margin-bottom: 20px;
     }
 
     /* Стили для модального окна */
     .modal-header {
-        border-bottom: 1px solid #dee2e6;
+        border-bottom: 2px solid #28a745;
     }
-</style>
+
+    .modal-title {
+        color: #28a745;
+    }
+
+    /* Текстовые элементы */
+    .resume-title {
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .resume-info {
+        color: #333;
+    }
 </style>
 
 <!-- Поле поиска -->
@@ -67,15 +92,15 @@
 </div>
 
 <!-- Список резюме -->
-<div id="resumeList" class="list-group">
+<div id="resumeList">
     {% for resume in items %}
-        <div class="list-group-item list-group-item-action mb-3 vacancy-card">
+        <div class="resume-card">
             <div>
-                <h5 class="text-primary vacancy-title">{{ resume.full_name }}</h5>
-                <p class="mb-1"><strong>Телефон:</strong> <span class="resume-phone">{{ resume.contact_info.phone }}</span></p>
-                <p class="mb-1"><strong>Email:</strong> <span class="resume-email">{{ resume.contact_info.email }}</span></p>
-                <p class="mb-1"><strong>Описание:</strong> {{ resume.summary }}</p>
-                <p class="mb-1"><strong>Навыки:</strong> {{ resume.skills | join(', ') }}</p>
+                <h5 class="resume-title">{{ resume.full_name }}</h5>
+                <p class="resume-info mb-1"><strong>Телефон:</strong> <span class="resume-phone">{{ resume.contact_info.phone }}</span></p>
+                <p class="resume-info mb-1"><strong>Email:</strong> <span class="resume-email">{{ resume.contact_info.email }}</span></p>
+                <p class="resume-info mb-1"><strong>Описание:</strong> {{ resume.summary }}</p>
+                <p class="resume-info mb-1"><strong>Навыки:</strong> {{ resume.skills | join(', ') }}</p>
             </div>
         </div>
     {% endfor %}
@@ -85,13 +110,13 @@
 <script>
     document.getElementById('searchInput').addEventListener('input', function() {
         const query = this.value.toLowerCase();
-        const resumes = document.querySelectorAll('#resumeList .list-group-item');
+        const resumes = document.querySelectorAll('#resumeList .resume-card');
 
         resumes.forEach(function(resume) {
-            const fullName = resume.querySelector('.vacancy-title').textContent.toLowerCase();
+            const fullName = resume.querySelector('.resume-title').textContent.toLowerCase();
             const phone = resume.querySelector('.resume-phone').textContent.toLowerCase();
             const email = resume.querySelector('.resume-email').textContent.toLowerCase();
-            const summary = resume.querySelector('.mb-1').textContent.toLowerCase();
+            const summary = resume.querySelector('.resume-info').textContent.toLowerCase();
             const skills = resume.textContent.toLowerCase();
 
             // Проверяем, содержит ли текст резюме поисковый запрос

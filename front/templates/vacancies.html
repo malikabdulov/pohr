@@ -5,89 +5,121 @@
 
 {% block content %}
 <style>
+
+
     .vacancy-card {
-        border-radius: 10px;
-        background-color: #ffffff;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        background-color: #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         padding: 20px;
-    }
-
-    .btn-success {
-        font-weight: bold;
-        font-size: 16px;
-    }
-
-    body {
-        background-color: #f0f4f7;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .vacancy-card {
-        border-radius: 10px;
-        transition: transform 0.2s, box-shadow 0.2s;
+        margin-bottom: 20px;
+        position: relative;
     }
 
     .vacancy-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
     }
 
-    .navbar {
-        background-color: #e3f2fd;
+    .priority-indicator {
+        width: 10px;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        border-radius: 12px 0 0 12px;
     }
 
-    .btn-outline-primary {
+    .priority-high {
+        background-color: #dc3545;
+    }
+
+    .priority-medium {
+        background-color: #ffc107;
+    }
+
+    .priority-low {
+        background-color: #28a745;
+    }
+
+    .btn-create-vacancy {
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    #searchInput {
+        height: 50px;
+        font-size: 18px;
+        padding-left: 40px;
+        background-image: url('data:image/svg+xml;base64,...'); /* Иконка поиска */
+        background-repeat: no-repeat;
+        background-position: 10px center;
+        background-size: 20px;
+    }
+
+    .tag {
+        display: inline-block;
+        background-color: #e0f7fa;
         color: #007bff;
-        border-color: #007bff;
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin-right: 5px;
+        font-size: 14px;
     }
 
-    .btn-outline-primary:hover {
-        background-color: #007bff;
-        color: #fff;
-    }
-
-    .modal-header {
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .form-control:focus {
-        border-color: #80bdff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+    .edit-button, .delete-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 </style>
 
-
 <!-- Контент -->
-<div class="container mt-5 pt-5">
-    <div class="text-center mb-4">
-        <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createVacancyModal">
+<div class="container mt-5 pt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Список вакансий</h2>
+        <button class="btn btn-success btn-create-vacancy" data-bs-toggle="modal" data-bs-target="#createVacancyModal">
             <i class="bi bi-plus-circle"></i> Создать вакансию
         </button>
     </div>
 
-    <!-- Поле поиска -->
+    <!-- Поле поиска и фильтры -->
     <div class="row mb-4">
-        <div class="col-md-12">
-            <input type="text" class="form-control form-control-lg" id="searchInput" placeholder="🔍 Поиск вакансий...">
+        <div class="col-md-8">
+            <input type="text" class="form-control form-control-lg" id="searchInput" placeholder="🔍 Найдите вакансию...">
+        </div>
+        <div class="col-md-4">
+            <select class="form-select form-select-lg">
+                <option selected>Фильтр по приоритету</option>
+                <option value="1">Высокий</option>
+                <option value="2">Средний</option>
+                <option value="3">Низкий</option>
+            </select>
         </div>
     </div>
 
     <!-- Список вакансий -->
-    <div id="vacancyList" class="list-group">
+    <div id="vacancyList">
         {% for item in items %}
-            <div class="list-group-item list-group-item-action mb-3 vacancy-card">
-                <div class="d-flex justify-content-between align-items-center">
+            <div class="vacancy-card">
+                <div class="priority-indicator {% if item.priority == 'high' %}priority-high{% elif item.priority == 'medium' %}priority-medium{% else %}priority-low{% endif %}"></div>
+                <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <h5 class="text-primary vacancy-title">{{ item.title }}</h5>
-                        <p class="mb-1"><strong>Опыт:</strong> <span class="vacancy-experience">{{ item.experience }}</span></p>
-                        <p class="mb-1"><strong>Навыки:</strong> <span class="vacancy-skills">{{ item.skills }}</span></p>
-                        <p class="mb-1"><strong>Образование:</strong> <span class="vacancy-education">{{ item.education }}</span></p>
+                        <h5 class="text-primary mb-2">{{ item.title }}</h5>
+                        <div>
+                            <span class="tag">{{ item.experience }}</span>
+                            <span class="tag">{{ item.skills }}</span>
+                            <span class="tag">{{ item.education }}</span>
+                        </div>
                     </div>
-                    <div>
-                        <button class="btn btn-sm btn-outline-secondary me-2 edit-button" data-bs-toggle="modal" data-bs-target="#editVacancyModal" data-id="{{ item._id }}">
+                    <div class="d-flex">
+                        <button class="btn btn-outline-secondary edit-button me-2" data-bs-toggle="modal" data-bs-target="#editVacancyModal" data-id="{{ item._id }}">
                             <i class="bi bi-pencil"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger delete-button" data-id="{{ item._id }}">
+                        <button class="btn btn-outline-danger delete-button" data-id="{{ item._id }}">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
@@ -242,7 +274,8 @@
                 if (backdrop) backdrop.remove();
 
                 // Обновляем данные в карточке вакансии на странице
-                const vacancyCard = document.querySelector(`[data-id="${vacancyId}"]`).closest('.list-group-item');
+                const vacancyCard = document.querySelector(`[data-id="${vacancyId}"]`);
+
                 vacancyCard.querySelector('.vacancy-title').textContent = title;
                 vacancyCard.querySelector('.vacancy-experience').textContent = experience;
                 vacancyCard.querySelector('.vacancy-skills').textContent = skills;
@@ -254,6 +287,10 @@
         .catch(error => {
             console.error('Произошла ошибка при обновлении:', error);
         });
+        const editModal = bootstrap.Modal.getInstance(document.getElementById('editVacancyModal'));
+editModal.hide();
+location.reload(); // Временное решение для проверки
+
     });
 
     // Очистка формы и удаление оверлея при закрытии модального окна
@@ -270,42 +307,52 @@
 
 let deleteVacancyId = null;
 
-    // Обработчик кнопки удаления
-    document.querySelectorAll('.delete-button').forEach(button => {
-        button.addEventListener('click', function () {
-            // Сохраняем ID вакансии и показываем модальное окно подтверждения
-            deleteVacancyId = this.getAttribute('data-id');
-            const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-            confirmDeleteModal.show();
-        });
+// Обработчик кнопки удаления
+document.querySelectorAll('.delete-button').forEach(button => {
+    button.addEventListener('click', function () {
+        // Сохраняем ID вакансии и показываем модальное окно подтверждения
+        deleteVacancyId = this.getAttribute('data-id');
+        const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+        confirmDeleteModal.show();
     });
+});
 
-    // Обработчик кнопки подтверждения удаления
-    document.getElementById('confirmDeleteButton').addEventListener('click', function () {
-        if (deleteVacancyId) {
-            // Отправляем DELETE-запрос на сервер
-            fetch(`/delete_vacancy/${deleteVacancyId}`, {
-                method: 'DELETE',
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Удаляем карточку вакансии из DOM
-                    document.querySelector(`[data-id="${deleteVacancyId}"]`).closest('.list-group-item').remove();
-                } else {
-                    alert('Ошибка: ' + data.message);
+// Обработчик кнопки подтверждения удаления
+document.getElementById('confirmDeleteButton').addEventListener('click', function () {
+    if (deleteVacancyId) {
+        // Отправляем DELETE-запрос на сервер
+        fetch(`/delete_vacancy/${deleteVacancyId}`, {
+            method: 'DELETE',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Находим элемент карточки вакансии и удаляем его из DOM
+                const vacancyCard = document.querySelector(`[data-id="${deleteVacancyId}"]`).closest('.vacancy-card');
+
+                // Проверяем, существует ли элемент перед удалением
+                if (vacancyCard) {
+                    vacancyCard.remove();
                 }
+
                 // Закрываем модальное окно
                 const confirmDeleteModal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
                 confirmDeleteModal.hide();
-            })
-            .catch(error => {
-                alert('Произошла ошибка при удалении: ' + error);
-                const confirmDeleteModal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
-                confirmDeleteModal.hide();
-            });
-        }
-    });
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Произошла ошибка при удалении:', error);
+            alert('Произошла ошибка при удалении. Попробуйте снова.');
+
+            // Закрываем модальное окно даже в случае ошибки
+            const confirmDeleteModal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
+            confirmDeleteModal.hide();
+        });
+    }
+});
+
 
 
 

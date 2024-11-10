@@ -6,9 +6,9 @@ from elasticsearch import Elasticsearch
 from flask import Flask, render_template, request, redirect, url_for, jsonify, abort, send_from_directory
 from pymongo import MongoClient
 
-from db.mongo_controller import add_vacancy, add_resumes, find_resume_by_name, find_vacancy_by_id, get_all_vacancies
+from db.mongo_controller import add_vacancy, add_resumes, find_resume_by_name, find_vacancy_by_id, get_all_resumes, get_all_vacancies
 from front.articles_data import articles
-from gpt.gpt import check_candidate_reliability, gen_cover_letter, parse_resume
+from gpt.gpt import ai_rank_resumes, check_candidate_reliability, gen_cover_letter, parse_resume
 from parser.file_parser import start_parse
 from parser.parse_utils import extract_text
 from telegram_bot.main import send_message
@@ -246,29 +246,37 @@ def search():
 # Пример функции advanced_rank_resumes с параметрами для весов
 def advanced_rank_resumes(technical_skills, soft_skills, cultural_fit, growth_potential, vacancy_id):
     # Здесь будет логика ранжирования резюме, используя vacancy_id и весовые коэффициенты
-    # job_description = find_vacancy_by_id(vacancy_id=vacancy_id)
-
-    # resumes = get_all_resumes()
-
-
-    # weighting_factors = {
-    #     "technical_skills": technical_skills,
-    #     "soft_skills": soft_skills,
-    #     "cultural_fit": cultural_fit,
-    #     "growth_potential": growth_potential
-    # }
-
-    # ranked_resumes = ai_rank_resumes(job_description=job_description,
-    #                 resumes=resumes,
-    #                 weighting_factors=weighting_factors)
-    
-    # return ranked_resumes, job_description
-
     job_description = find_vacancy_by_id(vacancy_id=vacancy_id)
-    job_description['_id'] = str(job_description['_id'])
+
+
+    # Преобразуем ObjectId и любые другие сложные типы в строки
+    if '_id' in job_description:
+        job_description['_id'] = str(job_description['_id'])
+
+    # Преобразуем job_description в JSON-совместимый формат
     job_description_json = json.dumps(job_description, ensure_ascii=False)
 
-    return [{"full_name":"Петров Алексей","relevance_score":92,"scores":{"technical_skills":95,"soft_skills":85,"cultural_fit":80,"growth_potential":90},"reasoning":{"technical_skills":"Обладает более чем 7 годами опыта в разработке сложных backend-решений, специализация в микросервисах и многопоточных приложениях.","soft_skills":"Демонстрирует менторство младшим разработчикам, что указывает на хорошие навыки коммуникации и лидерства.","cultural_fit":"Соответствие корпоративной культуре на уровне, готовность к переезду и обсуждению удаленной работы.","growth_potential":"Большой опыт и навыки позволяют предположить высокий потенциал для развития."},"missing_skills":[],"recommendations":""},{"full_name":"Кузнецова Анна","relevance_score":76,"scores":{"technical_skills":80,"soft_skills":80,"cultural_fit":70,"growth_potential":70},"reasoning":{"technical_skills":"Начальный уровень Java-разработчика с опытом стажировок в крупных компаниях, интерес к разработке веб-приложений и API.","soft_skills":"Демонстрирует умение работать в команде и обучаемость.","cultural_fit":"Небольшое расхождение с корпоративной культурой, но готовность работать удаленно.","growth_potential":"Потенциал для развития в профессиональном плане."},"missing_skills":[],"recommendations":""},{"full_name":"Салехова Диана","relevance_score":60,"scores":{"technical_skills":60,"soft_skills":80,"cultural_fit":70,"growth_potential":50},"reasoning":{"technical_skills":"Опыт в организации обучающих программ, но не прямая связь с автоматизированным тестированием.","soft_skills":"Хорошие навыки управления командой и переговоров.","cultural_fit":"Некоторое соответствие корпоративной культуре.","growth_potential":"Потенциал для развития в технической области."},"missing_skills":["Автоматизированное тестирование, Selenium, pytest"],"recommendations":"Рекомендуется дополнительное обучение по автоматизированному тестированию."}], job_description_json
+    resumes = get_all_resumes()
+
+
+    weighting_factors = {
+        "technical_skills": technical_skills,
+        "soft_skills": soft_skills,
+        "cultural_fit": cultural_fit,
+        "growth_potential": growth_potential
+    }
+
+    ranked_resumes = ai_rank_resumes(job_description=job_description,
+                    resumes=resumes,
+                    weighting_factors=weighting_factors)
+    
+    return ranked_resumes, job_description_json
+
+    # job_description = find_vacancy_by_id(vacancy_id=vacancy_id)
+    # job_description['_id'] = str(job_description['_id'])
+    # job_description_json = json.dumps(job_description, ensure_ascii=False)
+
+    # return [{"full_name":"Петров Алексей","relevance_score":92,"scores":{"technical_skills":95,"soft_skills":85,"cultural_fit":80,"growth_potential":90},"reasoning":{"technical_skills":"Обладает более чем 7 годами опыта в разработке сложных backend-решений, специализация в микросервисах и многопоточных приложениях.","soft_skills":"Демонстрирует менторство младшим разработчикам, что указывает на хорошие навыки коммуникации и лидерства.","cultural_fit":"Соответствие корпоративной культуре на уровне, готовность к переезду и обсуждению удаленной работы.","growth_potential":"Большой опыт и навыки позволяют предположить высокий потенциал для развития."},"missing_skills":[],"recommendations":""},{"full_name":"Кузнецова Анна","relevance_score":76,"scores":{"technical_skills":80,"soft_skills":80,"cultural_fit":70,"growth_potential":70},"reasoning":{"technical_skills":"Начальный уровень Java-разработчика с опытом стажировок в крупных компаниях, интерес к разработке веб-приложений и API.","soft_skills":"Демонстрирует умение работать в команде и обучаемость.","cultural_fit":"Небольшое расхождение с корпоративной культурой, но готовность работать удаленно.","growth_potential":"Потенциал для развития в профессиональном плане."},"missing_skills":[],"recommendations":""},{"full_name":"Салехова Диана","relevance_score":60,"scores":{"technical_skills":60,"soft_skills":80,"cultural_fit":70,"growth_potential":50},"reasoning":{"technical_skills":"Опыт в организации обучающих программ, но не прямая связь с автоматизированным тестированием.","soft_skills":"Хорошие навыки управления командой и переговоров.","cultural_fit":"Некоторое соответствие корпоративной культуре.","growth_potential":"Потенциал для развития в технической области."},"missing_skills":["Автоматизированное тестирование, Selenium, pytest"],"recommendations":"Рекомендуется дополнительное обучение по автоматизированному тестированию."}], job_description_json
 
 # Новый маршрут для получения деталей вакансии по ID
 @app.route('/get_vacancy_details/<vacancy_id>', methods=['GET'])
@@ -334,24 +342,24 @@ def generate_cover_letter():
     job_description = data.get('job_description')
     candidate_name = data.get('candidate_name')
 
-    # resume = find_resume_by_name(full_name=candidate_name)
-    # message = gen_cover_letter(job_description=job_description,
-    #                  resume=resume,
-    #                  candidate_name=candidate_name,
-    #                  channel=channel)
+    resume = find_resume_by_name(full_name=candidate_name)
+    message = gen_cover_letter(job_description=job_description,
+                     resume=resume,
+                     candidate_name=candidate_name,
+                     channel=channel)
     
-    message = """Дорогой Петров Алексей,
+#     message = """Дорогой Петров Алексей,
 
-Мы получили ваше резюме на вакансию Data Scientist в компании FH.
+# Мы получили ваше резюме на вакансию Data Scientist в компании FH.
 
-Мы заинтересованы в кандидатах с опытом работы в Python, Pandas, Scikit-learn, TensorFlow и образованием в МФТИ по направлению Прикладная математика и информатика.
+# Мы заинтересованы в кандидатах с опытом работы в Python, Pandas, Scikit-learn, TensorFlow и образованием в МФТИ по направлению Прикладная математика и информатика.
 
-Если у вас есть какие-либо вопросы или требуется дополнительная информация, пожалуйста, не стесняйтесь обращаться к нам. 
+# Если у вас есть какие-либо вопросы или требуется дополнительная информация, пожалуйста, не стесняйтесь обращаться к нам. 
 
-С уважением,
-[Имя менеджера]
-HR-менеджер компании FH
-"""
+# С уважением,
+# [Имя менеджера]
+# HR-менеджер компании FH
+# """
     return jsonify({"message": message})
 
 @app.route('/statistics')

@@ -38,6 +38,7 @@ def gen_cover_letter(job_description,
     Имя HR-менеджера: {hr_name}.
     Канал для отправки: {channel}.
     Тон письма должен быть дружелюбным, но формальным.
+    Текст не должен быть слишком длинным.
     """
 
     try:
@@ -49,7 +50,6 @@ def gen_cover_letter(job_description,
                 }
             ],
             model=MODEL,
-            max_tokens=300,
             temperature=0.7
         )
         

@@ -95,6 +95,7 @@ const candidateData = {
 };
 
 
+
 function generate_cover_letter(channel, jobDescription, candidateName) {
     fetch('/generate_cover_letter', {
         method: 'POST',
@@ -109,9 +110,11 @@ function generate_cover_letter(channel, jobDescription, candidateName) {
     })
     .then(response => response.json())
     .then(data => {
-        // Обновляем содержимое модального окна с сообщением от сервера
-        const modalBody = document.querySelector('#generateCoverLetterModal .modal-body');
-        modalBody.innerHTML = `<p>${data.message}</p>`;
+        // Отображаем текст от сервера в поле для редактирования
+        const coverLetterText = document.getElementById('coverLetterText');
+        coverLetterText.value = data.message;
+
+        console.log(data.resume);
 
         // Открываем модальное окно
         const modal = new bootstrap.Modal(document.getElementById('generateCoverLetterModal'));
@@ -119,9 +122,31 @@ function generate_cover_letter(channel, jobDescription, candidateName) {
     })
     .catch(error => {
         console.error('Ошибка:', error);
-        const modalBody = document.querySelector('#generateCoverLetterModal .modal-body');
-        modalBody.innerHTML = `<p>Произошла ошибка при генерации письма. Попробуйте снова.</p>`;
+        const coverLetterText = document.getElementById('coverLetterText');
+        coverLetterText.value = 'Произошла ошибка при генерации письма. Попробуйте снова.';
         const modal = new bootstrap.Modal(document.getElementById('generateCoverLetterModal'));
         modal.show();
     });
+}
+
+
+function sendCoverLetter() {
+    const coverLetterText = document.getElementById('coverLetterText').value;
+    console.log("Отправляемое сопроводительное письмо:", coverLetterText);
+
+    fetch('/send-cover-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: coverLetterText })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Ответ сервера:", data);
+        console.log("Сообщение отравлено");  // Показываем сообщение об успешной отправке
+
+        // Закрываем модальное окно
+        const modal = bootstrap.Modal.getInstance(document.getElementById('generateCoverLetterModal'));
+        modal.hide();
+    })
+    .catch(error => console.error("Ошибка:", error));
 }

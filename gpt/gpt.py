@@ -336,5 +336,45 @@ def ai_rank_resumes(job_description,
 
 
 
-def func_for_front():
-    return [{}]
+
+def check_candidate_reliability(name):
+    prompt = f"""
+    У меня есть кандидат на вакансию, и я хотел бы оценить его надёжность на основе открытых данных, таких как соцсети, профессиональный опыт и общая репутация. Кандидат имеет следующие данные:
+
+    Имя: {name}
+
+    Проанализируй и ответь, является ли этот кандидат надёжным. В процессе учитывай такие факторы, как наличие отрицательных отзывов, упоминание в негативном контексте в соцсетях и наличие подтверждённого профессионального опыта.
+
+    Верни результат в формате JSON, где:
+    - "reliable" будет "true" или "false"
+    - "reliable_reason" — короткая причина, если ответ "нет".
+
+    Пример:
+    {{
+        "reliable": true,
+        "reliable_reason": "Нет данных, указывающих на ненадежность"
+    }}
+
+    Ответ:
+    """
+
+    # Отправка запроса к модели GPT
+    response = client.chat.completions.create(
+        messages=[{
+            "role": "user",
+            "content": prompt
+        }],
+        model=MODEL,
+        temperature=0.0
+    )
+
+    # Получение и обработка ответа
+    try:
+        result = json.loads(response.choices[0].message.content)
+        return result
+    except json.JSONDecodeError:
+        return {
+            "reliable": "true",
+            "reliable_reason": "Ошибка в обработке ответа"
+        }
+

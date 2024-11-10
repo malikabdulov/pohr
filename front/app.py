@@ -7,7 +7,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, a
 from pymongo import MongoClient
 
 from db.mongo_controller import add_vacancy, add_resumes, find_resume_by_name, find_vacancy_by_id, get_all_vacancies
-from gpt.gpt import gen_cover_letter, parse_resume
+from gpt.gpt import check_candidate_reliability, gen_cover_letter, parse_resume
 from parser.file_parser import start_parse
 from parser.parse_utils import extract_text
 
@@ -79,6 +79,18 @@ def process_resumes(folder_path):
                     parsed_data = parse_resume(resume_text)
                     if parsed_data:
                         parsed_data['source_file'] = file_path
+                        try:
+                            parsed_data['contact_info']['tg_chat_id'] = 413974882
+                        except:
+                            parsed_data['contact_info'] = {'tg_chat_id': 413974882}
+                        
+                        rel = check_candidate_reliability(parsed_data['full_name'])
+                        
+                        try:
+                            parsed_data['reliability'] = rel
+                        except:
+                            parsed_data['reliability'] = {'reliable': True, 'reliable_reason': ''}
+
                         add_resumes([parsed_data])
                         parsed_files.add(file)
                         print(f"Файл успешно спаршен: {file}")

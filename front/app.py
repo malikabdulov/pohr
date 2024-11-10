@@ -11,6 +11,7 @@ from front.articles_data import articles
 from gpt.gpt import check_candidate_reliability, gen_cover_letter, parse_resume
 from parser.file_parser import start_parse
 from parser.parse_utils import extract_text
+from telegram_bot.main import send_message
 
 
 app = Flask(__name__)
@@ -333,15 +334,24 @@ def generate_cover_letter():
     job_description = data.get('job_description')
     candidate_name = data.get('candidate_name')
 
-    resume = find_resume_by_name(full_name=candidate_name)
-
-
-    message = gen_cover_letter(job_description=job_description,
-                     resume=resume,
-                     candidate_name=candidate_name,
-                     channel=channel)
+    # resume = find_resume_by_name(full_name=candidate_name)
+    # message = gen_cover_letter(job_description=job_description,
+    #                  resume=resume,
+    #                  candidate_name=candidate_name,
+    #                  channel=channel)
     
-    print('message', message)
+    message = """Дорогой Петров Алексей,
+
+Мы получили ваше резюме на вакансию Data Scientist в компании FH.
+
+Мы заинтересованы в кандидатах с опытом работы в Python, Pandas, Scikit-learn, TensorFlow и образованием в МФТИ по направлению Прикладная математика и информатика.
+
+Если у вас есть какие-либо вопросы или требуется дополнительная информация, пожалуйста, не стесняйтесь обращаться к нам. 
+
+С уважением,
+[Имя менеджера]
+HR-менеджер компании FH
+"""
     return jsonify({"message": message})
 
 @app.route('/statistics')
@@ -363,6 +373,22 @@ def view_article(article_id):
         return "Статья не найдена", 404
     return render_template('article.html', article=article)
 
+
+
+# Новый маршрут для обработки отправки сопроводительного письма
+@app.route('/send-cover-letter', methods=['POST'])
+def send_cover_letter():
+    data = request.get_json()
+    message = data.get('message', '')
+    resume = data.get('resume', '')
+
+    chat_id = 413974882
+    send_message(chat_id=chat_id,message=message)
+    # Логика обработки сообщения: можно добавить отправку на email, Telegram и т.д.
+    # Здесь мы просто имитируем успешную отправку
+
+    # Возвращаем ответ клиенту
+    return jsonify({"status": "success", "message": "Сопроводительное письмо успешно отправлено"})
 
 
 if __name__ == '__main__':

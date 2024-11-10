@@ -52,7 +52,7 @@ async def send_message_async(chat_id: int, message: str):
     bot = Bot(token=token)
     try:
         await bot.send_message(chat_id=chat_id, text=message)
-        logger.info(f"Сообщение отправлено пользователю {chat_id}: {message}")
+        logger.info(f"Сообщение отправлено пользователю {chat_id}")
     except Exception as e:
         logger.error(f"Ошибка при отправке сообщения пользователю {chat_id}: {e}")
 

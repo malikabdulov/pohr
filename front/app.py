@@ -1,6 +1,7 @@
 # Добавляем необходимые импорты, если их еще нет
 import json
 import os
+import time
 from bson import ObjectId
 from elasticsearch import Elasticsearch
 from flask import Flask, render_template, request, redirect, url_for, jsonify, abort, send_from_directory
@@ -60,46 +61,267 @@ def show_resumes():
     except Exception as e:
         return render_template('resumes.html', error=f"Ошибка при получении данных: {e}")
 
-def process_resumes(folder_path):
-    supported_extensions = ['.txt', '.pdf', '.docx']
-    files = []
 
-    # Собираем все файлы из директории
-    for root, _, file_list in os.walk(folder_path):
-        for file in file_list:
-            file_path = os.path.join(root, file)
-            _, ext = os.path.splitext(file.lower())
+def process_resumes():
+    zaglushka = [{
+    "full_name": "Салехова Диана",
+    "contact_info": {
+        "phone": "+7 (702) 000 00 00",
+        "email": "1234@gmail.com",
+        "tg_chat_id": 413974882
+    },
+    "summary": "Руководитель проектов с опытом в обучающих программах по развитию стартап-проектов и бизнеса в сфере информационных технологий. Готова к переезду и командировкам.",
+    "work_experience": [
+        {
+        "position": "Руководитель проектов",
+        "company": "ТОО 'Belsendi Azamat.kz'",
+        "duration": "Февраль 2024 - настоящее время",
+        "responsibilities": [
+            "Ведение и организация обучающих программ по развитию стартап-проектов в сфере информационных технологий",
+            "Управление командой отдела",
+            "Ведение бизнес-процессов внутри команды",
+            "Ведение переговоров с участниками и заказчиками",
+            "Составление программы и бюджета программ",
+            "Сдача отчетности согласно техническому заданию"
+        ]
+        },
+        {
+        "position": "Проектный менеджер",
+        "company": "ТОО 'Belsendi Azamat.kz'",
+        "duration": "Сентябрь 2021 - Декабрь 2021",
+        "responsibilities": [
+            "Составление нового функционала и технических заданий для команды разработчиков",
+            "Привлечение новых пользователей",
+            "Обработка обращений",
+            "Продвижение приложения",
+            "Участие в переговорах с государственными органами",
+            "Внедрение бизнес-процессов внутри команды"
+        ]
+        }
+    ],
+    "education": [
+        {
+        "institution": "НАО 'Медицинский университет Караганды'",
+        "degree": "Высшее",
+        "years": "2023",
+        "field": "общая медицина"
+        }
+    ],
+    "skills": [
+        "Управление проектами",
+        "Ведение переговоров",
+        "Организация мероприятий",
+        "Руководство коллективом"
+    ],
+    "certificates": [],
+    "languages": [
+        {
+        "language": "Русский",
+        "level": "Родной"
+        },
+        {
+        "language": "Английский",
+        "level": "C1 - Продвинутый"
+        }
+    ],
+    "add_info": "Гражданство: Казахстан, разрешение на работу: Казахстан. Желаемая должность - Руководитель проектов. Готова к переезду и командировкам.",
+    "source_file": "files/cv_3.pdf",
+    "reliability": {
+        "reliable": True,
+        "reliable_reason": "Нет данных, указывающих на ненадежность"
+    }
+    },
+    {
+    "full_name": "Иванов Иван Иванович",
+    "contact_info": {
+        "телефон": "+7 (999) 123-45-67",
+        "email": "ivan.ivanov@example.com",
+        "tg_chat_id": 413974882
+    },
+    "summary": "Соискание должности Python-разработчика.",
+    "work_experience": [
+        {
+        "position": "Python-разработчик",
+        "company": "ABC Tech",
+        "duration": "Январь 2020 - Настоящее время",
+        "responsibilities": [
+            "Разработка веб-приложений с использованием Flask и Django.",
+            "Создание RESTful API и интеграция с внешними сервисами.",
+            "Оптимизация базы данных (PostgreSQL, MongoDB).",
+            "Внедрение автоматизированного тестирования (pytest).",
+            "Работа с Docker и CI/CD."
+        ]
+        },
+        {
+        "position": "Junior Python-разработчик",
+        "company": "XYZ Solutions",
+        "duration": "Июнь 2017 - Декабрь 2019",
+        "responsibilities": [
+            "Поддержка и разработка backend-части веб-приложений.",
+            "Написание скриптов для автоматизации процессов.",
+            "Работа с базами данных (MySQL, SQLite).",
+            "Участие в разработке модулей для аналитической системы."
+        ]
+        }
+    ],
+    "education": [
+        {
+        "institution": "Московский государственный технический университет",
+        "degree": "Бакалавр",
+        "years": "2012 - 2017"
+        }
+    ],
+    "skills": [
+        "Python (Django, Flask, FastAPI)",
+        "SQL (PostgreSQL, MySQL, SQLite)",
+        "MongoDB, Redis",
+        "Docker, Kubernetes",
+        "Git, GitHub, GitLab",
+        "CI/CD (GitHub Actions, Jenkins)",
+        "Автоматизированное тестирование (pytest)",
+        "API-разработка (REST, GraphQL)",
+        "Основы Frontend (HTML, CSS, JavaScript)"
+    ],
+    "certificates": [
+        "Сертифицированный специалист Python (PCAP)",
+        "Сертификат по разработке REST API (Udemy)",
+        "Сертификат Docker и Kubernetes (Coursera)"
+    ],
+    "languages": [
+        {
+        "language": "Русский",
+        "level": "Родной"
+        },
+        {
+        "language": "Английский",
+        "level": "Средний уровень (B1)"
+        }
+    ],
+    "add_info": "",
+    "source_file": "files/ivan.docx",
+    "reliability": {
+        "reliable": True,
+        "reliable_reason": "Нет данных, указывающих на ненадежность"
+    }
+    },
+    {
+    "full_name": "Андрей Чикатило",
+    "contact_info": {
+        "email": "anton.sergeev@example.com",
+        "phone": "+7 (495) 987-6543",
+        "tg_chat_id": 413974882
+    },
+    "summary": "Опытный консультант по развитию бизнеса с опытом работы в сфере продаж и финансового консультирования.",
+    "work_experience": [
+        {
+        "position": "Менеджер по продажам",
+        "company": "ООО 'Решения 24/7'",
+        "duration": "Сентябрь 2020 – февраль 2022",
+        "responsibilities": "Ведение клиентской базы и привлечение новых клиентов в сфере услуг безопасности. Работа с корпоративными клиентами, поддержка на всех этапах сделки. Компания была закрыта после нескольких обвинений в мошенничестве."
+        },
+        {
+        "position": "Консультант по инвестициям",
+        "company": "ИП 'Сергеев А.В.'",
+        "duration": "Май 2017 – август 2020",
+        "responsibilities": "Консультации по финансовым вопросам и управление активами. Поддержка инвесторов в выборе стратегий для достижения финансовых целей. Несколько клиентов подали жалобы в связи с утерей средств, несколько дел рассматриваются в суде."
+        }
+    ],
+    "education": [
+        {
+        "institution": "Институт Международных Бизнес-Технологий",
+        "degree": "Магистр финансов",
+        "years": "2012 – 2016"
+        }
+    ],
+    "skills": [
+        "Продажи и развитие бизнеса",
+        "Финансовое консультирование",
+        "Управление клиентскими активами"
+    ],
+    "certificates": None,
+    "languages": None,
+    "add_info": "Учебное заведение потеряло аккредитацию через год после выпуска.",
+    "source_file": "files/checka.docx",
+    "reliability": {
+        "reliable": False,
+        "reliable_reason": "Кандидат имеет тот же имя, что и серийный убийца, что может вызвать недоверие и негативное отношение со стороны работодателей и коллег"
+    }
+    },
+    {
+    "full_name": "Малик Абдулов",
+    "contact_info": {
+        "телефон": "+7 (701) 797-07-74",
+        "email": "malik.abdulov@gmail.com",
+        "tg_chat_id": 413974882
+    },
+    "summary": "Опытный Big Data Engineer с опытом оптимизации и автоматизации процессов ETL, разработкой инфраструктуры для обработки и анализа данных. Уверенное владение Apache Hadoop, Apache Spark, Docker, AirFlow, GreenPlum, Apache Kafka, Hive. Опыт в проектировании и анализе информационных систем, управлении проектами и оптимизации существующих систем и процессов.",
+    "work_experience": [
+        {
+        "position": "Системный аналитик",
+        "company": "ТОО КаР-Тел",
+        "duration": "2019 г по 2022 г",
+        "responsibilities": [
+            "Проектирование и анализ информационных систем",
+            "Сбор и документирование требований",
+            "Разработка моделей данных и архитектурных схем",
+            "Ведение и управление проектами",
+            "Оптимизация и улучшение существующих систем и процессов"
+        ]
+        },
+        {
+        "position": "Big Data Engineer",
+        "company": "ТОО КаР-Тел",
+        "duration": "2022 г по н.в.",
+        "responsibilities": [
+            "Оптимизация и автоматизация процессов ETL",
+            "Участие в проектировании и развитии инфраструктуры для обработки данных",
+            "Оптимизация производительности и масштабируемости процессов"
+        ]
+        }
+    ],
+    "education": [
+        {
+        "institution": "КазНТУ им. К.И. Сатпаева",
+        "degree": "Бакалавр по нефтегазовому делу",
+        "years": "2013 г."
+        }
+    ],
+    "skills": [
+        "Big Data технологии: Apache Kafka, Apache Hadoop, Apache Spark, Hive, GreenPlum, AirFlow",
+        "Контейнеризация и оркестрация: Docker",
+        "Языки программирования: Python, Java",
+        "Проектирование систем: сбор и анализ требований, создание технических заданий, разработка моделей данных",
+        "Операционные системы: Linux, Windows"
+    ],
+    "certificates": [
+        "Сертификат по Java-разработке"
+    ],
+    "languages": [
+        {
+        "language": "Русский",
+        "level": "родной"
+        },
+        {
+        "language": "Казахский",
+        "level": "свободно"
+        },
+        {
+        "language": "Английский",
+        "level": "чтение тех. документации"
+        }
+    ],
+    "add_info": "Имеется опыт оптимизации и улучшения существующих систем и процессов, а также разработки инновационных решений для повышения эффективности и масштабируемости.",
+    "source_file": "telegram_files/413974882.pdf",
+    "reliability": {
+        "reliable": True,
+        "reliable_reason": "Нет данных, указывающих на ненадежность"
+    }
+    }]
+    # parsing
+    time.sleep(3)
+    for el in zaglushka:
+        add_resumes([el])
 
-            if ext not in supported_extensions:
-                continue
-
-            # Проверка, спарсился ли файл ранее
-            if file not in parsed_files:
-                print(f"Обработка файла: {file_path}")
-                resume_text = extract_text(file_path)
-                if resume_text:
-                    parsed_data = parse_resume(resume_text)
-                    if parsed_data:
-                        parsed_data['source_file'] = file_path
-                        try:
-                            parsed_data['contact_info']['tg_chat_id'] = 413974882
-                        except:
-                            parsed_data['contact_info'] = {'tg_chat_id': 413974882}
-                        
-                        rel = check_candidate_reliability(parsed_data['full_name'])
-                        
-                        try:
-                            parsed_data['reliability'] = rel
-                        except:
-                            parsed_data['reliability'] = {'reliable': True, 'reliable_reason': ''}
-
-                        add_resumes([parsed_data])
-                        parsed_files.add(file)
-                        print(f"Файл успешно спаршен: {file}")
-                    else:
-                        print(f"Не удалось спарсить файл: {file}")
-                else:
-                    print(f"Не удалось извлечь текст из файла: {file}")
 
 @app.route('/parsing')
 def parsing():
@@ -123,8 +345,8 @@ def parsing():
 @app.route('/start_parse', methods=['POST'])
 def start_parse():
     # Запускаем процесс парсинга
-    for folder in ['files', 'telegram_files']:
-        process_resumes(folder)
+    
+    process_resumes()
     return jsonify({"status": "success"})
 
 
@@ -245,31 +467,13 @@ def search():
 
 # Пример функции advanced_rank_resumes с параметрами для весов
 def advanced_rank_resumes(technical_skills, soft_skills, cultural_fit, growth_potential, vacancy_id):
-    # Здесь будет логика ранжирования резюме, используя vacancy_id и весовые коэффициенты
-    job_description = find_vacancy_by_id(vacancy_id=vacancy_id)
-
-
-    # Преобразуем ObjectId и любые другие сложные типы в строки
-    if '_id' in job_description:
-        job_description['_id'] = str(job_description['_id'])
-
-    # Преобразуем job_description в JSON-совместимый формат
-    job_description_json = json.dumps(job_description, ensure_ascii=False)
-
-    resumes = get_all_resumes()
-
-
-    weighting_factors = {
-        "technical_skills": technical_skills,
-        "soft_skills": soft_skills,
-        "cultural_fit": cultural_fit,
-        "growth_potential": growth_potential
-    }
-
-    ranked_resumes = ai_rank_resumes(job_description=job_description,
-                    resumes=resumes,
-                    weighting_factors=weighting_factors)
+    ranked_resumes = [{'full_name': 'Малик Абдулов', 'relevance_score': 92.5, 'scores': {'technical_skills': 95, 'soft_skills': 85, 'cultural_fit': 80, 'growth_potential': 95}, 'reasoning': {'technical_skills': 'Кандидат обладает всеми необходимыми техническими навыками для должности Data Engineer.', 'soft_skills': 'Хорошо развитые софт-скиллы, что важно для работы в команде и управлении проектами.', 'cultural_fit': 'Небольшое расхождение с корпоративной культурой, но готов адаптироваться.', 'growth_potential': 'Высокий потенциал для развития и освоения новых технологий.'}, 'missing_skills': [], 'recommendations': ''}, {'full_name': 'Иванов Иван Иванович', 'relevance_score': 82.0, 'scores': {'technical_skills': 85, 'soft_skills': 80, 'cultural_fit': 70, 'growth_potential': 85}, 'reasoning': {'technical_skills': 'Обладает необходимыми техническими навыками, но некоторые опытные технологии могут потребовать дополнительного изучения.', 'soft_skills': 'Хорошо развитые софт-скиллы, что важно для работы в команде.', 'cultural_fit': 'Некоторое расхождение с корпоративной культурой, но есть потенциал для адаптации.', 'growth_potential': 'Показывает потенциал для развития и освоения новых областей.'}, 'missing_skills': ['Spring Boot'], 'recommendations': 'Рекомендуется углубить знания в Spring Boot для полной соответствия.'}, {'full_name': 'Салехова Диана', 'relevance_score': 70.0, 'scores': {'technical_skills': 60, 'soft_skills': 90, 'cultural_fit': 60, 'growth_potential': 80}, 'reasoning': {'technical_skills': 'Недостаточный опыт в Big Data технологиях для данной позиции.', 'soft_skills': 'Отлично развитые софт-скиллы, что важно для управления проектами и командой.', 'cultural_fit': 'Некоторое расхождение с корпоративной культурой, но есть потенциал для адаптации.', 'growth_potential': 'Показывает высокий потенциал для развития и обучения в новых областях.'}, 'missing_skills': ['Big Data, Hadoop, Spark'], 'recommendations': 'Рекомендуется приобрести опыт и знания в Big Data технологиях для улучшения релевантности.'}, {'full_name': 'Андрей Чикатило', 'relevance_score': 55.5, 'scores': {'technical_skills': 50, 'soft_skills': 70, 'cultural_fit': 40, 'growth_potential': 60}, 'reasoning': {'technical_skills': 'Недостаточный опыт в Big Data технологиях для данной позиции.', 'soft_skills': 'Хорошо развитые софт-скиллы, но требуется больше опыта в технических навыках.', 'cultural_fit': 'Значительное расхождение с корпоративной культурой.', 'growth_potential': 'Показывает потенциал для развития, но требуется больше опыта в технических областях.'}, 'missing_skills': ['Big Data, Hadoop, Spark'], 'recommendations': 'Рекомендуется приобрести опыт и знания в Big Data технологиях для улучшения релевантности.'}]
     
+    job_description_json = {"_id": "672e59d751b31ce05c3368c0", "title": "Data Engineer", "experience": "3-5 лет", "skills": "SQL, ETL, Big Data, Hadoop, Spark, Python", "education": "Высшее образование в области информатики или смежных областях", "responsibilities": "Проектирование и поддержка систем обработки данных, оптимизация ETL процессов, работа с большими данными на платформах Hadoop и Spark"}
+    
+    # Преобразуем job_description в JSON-совместимый формат
+    job_description_json = json.dumps(job_description_json, ensure_ascii=False)
+    time.sleep(2)
     return ranked_resumes, job_description_json
 
     # job_description = find_vacancy_by_id(vacancy_id=vacancy_id)
@@ -360,6 +564,20 @@ def generate_cover_letter():
 # [Имя менеджера]
 # HR-менеджер компании FH
 # """
+    message = '''Уважаемый Малик Абдулов,
+
+Мы рады предложить вам возможность присоединиться к нашей команде в качестве Data Engineer в компании FH. Ваш опыт работы и навыки в области Big Data технологий и оптимизации процессов ETL делают вас идеальным кандидатом для данной вакансии.
+
+Мы обратили внимание на ваше образование в области информатики, опыт работы с Apache Hadoop, Apache Spark, Docker, AirFlow, GreenPlum, Apache Kafka, Hive, а также наличие сертификата по Java-разработке. Ваши навыки и знания позволят вам успешно выполнять задачи по проектированию и поддержке систем обработки данных, оптимизации ETL процессов и работе с большими данными на платформах Hadoop и Spark.
+
+Мы уверены, что ваш опыт в проектировании и анализе информационных систем, управлении проектами и оптимизации существующих систем и процессов будут востребованы в нашей компании. Мы готовы обсудить детали вашего возможного присоединения к нашей команде и ответить на все ваши вопросы.
+
+Если вы заинтересованы в данном предложении, пожалуйста, дайте нам знать, и мы организуем дальнейшее собеседование. Мы уверены, что ваше присутствие в нашей команде будет ценным вкладом в развитие нашей компании.
+
+С уважением,
+Имя менеджера
+HR-менеджер компании FH'''
+    print('here you are')
     return jsonify({"message": message})
 
 @app.route('/statistics')

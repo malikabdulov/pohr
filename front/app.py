@@ -7,6 +7,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, a
 from pymongo import MongoClient
 
 from db.mongo_controller import add_vacancy, add_resumes, find_resume_by_name, find_vacancy_by_id, get_all_vacancies
+from front.articles_data import articles
 from gpt.gpt import check_candidate_reliability, gen_cover_letter, parse_resume
 from parser.file_parser import start_parse
 from parser.parse_utils import extract_text
@@ -342,6 +343,26 @@ def generate_cover_letter():
     
     print('message', message)
     return jsonify({"message": message})
+
+@app.route('/statistics')
+def statistics():
+    return render_template('statistics.html', active_page='statistics')
+
+@app.route("/chatbot")
+def chatbot():
+    return render_template("chatbot.html", active_page="chatbot")
+
+@app.route('/knowledge_base')
+def knowledge_base():
+    return render_template('knowledge_base.html', articles=articles)
+
+@app.route('/article/<int:article_id>')
+def view_article(article_id):
+    article = next((item for item in articles if item["id"] == article_id), None)
+    if article is None:
+        return "Статья не найдена", 404
+    return render_template('article.html', article=article)
+
 
 
 if __name__ == '__main__':

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}База знаний{% endblock %}
+{% block title_header %}База знаний HR{% endblock %}
+
+{% block content %}
+<style>
+    .article-card {
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .article-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .article-preview {
+        max-height: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .btn-read-more {
+        background-color: #28a745;
+        color: #fff;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+    .btn-read-more:hover {
+        background-color: #66bb6a;
+    }
+
+    .search-bar {
+        font-size: 1.2rem;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #28a745;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <input type="text" id="searchInput" class="form-control search-bar" placeholder="🔍 Поиск статей...">
+        </div>
+    </div>
+
+    <div id="articlesList" class="row">
+        {% for article in articles %}
+        <div class="col-md-4 mb-4">
+            <div class="card article-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ article.title }}</h5>
+                    <p class="card-text article-preview">{{ article.content[:150] }}...</p>
+                    <a href="/article/{{ article.id }}" class="btn btn-read-more w-100">Читать далее</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Скрипт для фильтрации статей -->
+<script>
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const articles = document.querySelectorAll('#articlesList .col-md-4');
+
+        articles.forEach(function(article) {
+            const title = article.querySelector('.card-title').textContent.toLowerCase();
+            const preview = article.querySelector('.article-preview').textContent.toLowerCase();
+
+            if (title.includes(query) || preview.includes(query)) {
+                article.style.display = 'block';
+            } else {
+                article.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+{% endblock %}

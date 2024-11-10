@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Статистика{% endblock %}
+{% block title_header %}Дэшборд статистики{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Карточки с ключевыми показателями -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Количество резюме</h5>
+                    <p class="display-4" id="totalResumes">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Количество вакансий</h5>
+                    <p class="display-4" id="totalVacancies">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Среднее время закрытия вакансии</h5>
+                    <p class="display-4" id="avgClosingTime">0 дней</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- График распределения вакансий и резюме -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title text-center">Распределение резюме и вакансий</h5>
+            <canvas id="statsChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Подключение Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Генерация случайных данных
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Данные статистики
+    const totalResumes = getRandomInt(500, 2000);
+    const totalVacancies = getRandomInt(100, 500);
+    const avgClosingTime = getRandomInt(15, 45);
+
+    // Обновляем карточки с данными
+    document.getElementById('totalResumes').textContent = totalResumes;
+    document.getElementById('totalVacancies').textContent = totalVacancies;
+    document.getElementById('avgClosingTime').textContent = avgClosingTime + ' дней';
+
+    // Настройка графика
+    const ctx = document.getElementById('statsChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Резюме', 'Вакансии'],
+            datasets: [{
+                label: 'Количество',
+                data: [totalResumes, totalVacancies],
+                backgroundColor: ['#28a745', '#007bff']
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

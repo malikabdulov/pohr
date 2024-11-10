@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }}{% endblock %}
+{% block title_header %}{{ article.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card shadow-sm p-4">
+        <h2>{{ article.title }}</h2>
+        <p>{{ article.content }}</p>
+        <a href="/knowledge_base" class="btn btn-secondary">Назад к базе знаний</a>
+    </div>
+</div>
+{% endblock %}

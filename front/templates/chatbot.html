@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Чат-Бот{% endblock %}
+{% block title_header %}Чат-Бот и связь с кандидатами{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card shadow-sm p-4 mb-4">
+        <h5 class="mb-3 text-center">Общение с кандидатами</h5>
+
+        <!-- Форма для выбора канала связи -->
+        <div class="mb-3">
+            <label for="channelSelect" class="form-label">Выберите канал связи:</label>
+            <select id="channelSelect" class="form-select">
+                <option value="telegram">Telegram</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="email">Email</option>
+            </select>
+        </div>
+
+        <!-- Поле ввода сообщения -->
+        <div class="mb-3">
+            <textarea id="messageInput" class="form-control" rows="5" placeholder="Введите ваше сообщение..."></textarea>
+        </div>
+
+        <!-- Кнопка отправки -->
+        <button id="sendMessageButton" class="btn btn-primary w-100">Отправить сообщение</button>
+    </div>
+
+    <!-- История чата -->
+    <div class="card shadow-sm p-4">
+        <h5 class="mb-3 text-center">История сообщений</h5>
+        <div id="chatHistory" class="chat-history bg-light p-3 rounded" style="height: 300px; overflow-y: scroll;">
+            <p class="text-muted text-center">Сообщений пока нет</p>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript для отправки сообщений -->
+<script>
+    document.getElementById('sendMessageButton').addEventListener('click', function () {
+        const channel = document.getElementById('channelSelect').value;
+        const message = document.getElementById('messageInput').value;
+        const chatHistory = document.getElementById('chatHistory');
+
+        if (message.trim() === '') {
+            alert('Пожалуйста, введите сообщение.');
+            return;
+        }
+
+        // Отправка сообщения (заглушка)
+        const newMessage = document.createElement('p');
+        newMessage.innerHTML = `<strong>Вы (${channel}):</strong> ${message}`;
+        chatHistory.appendChild(newMessage);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+
+        // Очищаем поле ввода
+        document.getElementById('messageInput').value = '';
+
+        // Имитация ответа
+        setTimeout(() => {
+            const reply = document.createElement('p');
+            reply.innerHTML = `<strong>Кандидат:</strong> Спасибо за сообщение! Я скоро отвечу.`;
+            chatHistory.appendChild(reply);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }, 1000);
+    });
+</script>
+{% endblock %}

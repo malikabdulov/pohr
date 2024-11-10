@@ -5,6 +5,33 @@
 
 {% block content %}
 <style>
+    /* Стили для иконки предупреждения */
+/* Стили для карточек резюме */
+.resume-card {
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-left: 5px solid #28a745;
+    position: relative;
+}
+
+/* Иконка восклицательного знака */
+.alert-icon {
+    font-size: 1.5rem;
+    color: #dc3545; /* Красный цвет */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Размер иконки немного увеличен для удобства */
+.alert-icon i {
+    font-size: 1.75rem;
+}
+
     /* Стили для карточек резюме */
     .resume-card {
         border-radius: 10px;
@@ -102,6 +129,14 @@
                 <p class="resume-info mb-1"><strong>Описание:</strong> {{ resume.summary }}</p>
                 <p class="resume-info mb-1"><strong>Навыки:</strong> {{ resume.skills | join(', ') }}</p>
             </div>
+                        <!-- Проверка надежности кандидата -->
+            {% if resume.reliability and not resume.reliability.reliable %}
+                <!-- Красный восклицательный знак -->
+           <!-- Всегда видимый восклицательный знак -->
+            <div class="alert-icon position-absolute top-0 end-0 m-3">
+                <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            </div>
+            {% endif %}
         </div>
     {% endfor %}
 </div>

@@ -12,7 +12,7 @@ client = OpenAI(
     api_key=os.getenv('OPENAI_API_SECRET_KEY'),
 )
 
-def generate_cover_letter(job_description, 
+def gen_cover_letter(job_description, 
                           resume, 
                           candidate_name, 
                           hr_name="Имя менеджера", 

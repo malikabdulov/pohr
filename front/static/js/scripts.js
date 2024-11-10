@@ -39,13 +39,13 @@ function updateWeights(event) {
     // Управляем состоянием кнопки и цветом индикатора
     const rankButton = document.querySelector(".btn-primary");
     if (total === 100) {
-        document.getElementById("totalIndicator").style.color = "#007bff";
+        document.getElementById("totalIndicator").style.color = "#ffffff";
         rankButton.disabled = false;
         rankButton.style.backgroundColor = "#007bff"; // Активный синий цвет
     } else {
-        document.getElementById("totalIndicator").style.color = "#6c757d";
+        document.getElementById("totalIndicator").style.color = "#ffffff";
         rankButton.disabled = true;
-        rankButton.style.backgroundColor = "#6c757d"; // Серый цвет
+        rankButton.style.backgroundColor = "#007bff"; // Серый цвет
     }
 }
 
@@ -109,7 +109,19 @@ function generate_cover_letter(channel, jobDescription, candidateName) {
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message); // Отображение сообщения, полученного от сервера
+        // Обновляем содержимое модального окна с сообщением от сервера
+        const modalBody = document.querySelector('#generateCoverLetterModal .modal-body');
+        modalBody.innerHTML = `<p>${data.message}</p>`;
+
+        // Открываем модальное окно
+        const modal = new bootstrap.Modal(document.getElementById('generateCoverLetterModal'));
+        modal.show();
     })
-    .catch(error => console.error('Ошибка:', error));
+    .catch(error => {
+        console.error('Ошибка:', error);
+        const modalBody = document.querySelector('#generateCoverLetterModal .modal-body');
+        modalBody.innerHTML = `<p>Произошла ошибка при генерации письма. Попробуйте снова.</p>`;
+        const modal = new bootstrap.Modal(document.getElementById('generateCoverLetterModal'));
+        modal.show();
+    });
 }
